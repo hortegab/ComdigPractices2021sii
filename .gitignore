@@ -1,3 +1,18 @@
+######################################################
+# Lo siguiente son archivos que se generan comunmente al correr flujogramas nuestros dGNU Radio pero solo tienen valor temporal
+Lab_total.py
+wform.py
+formas.py
+top_block.py
+ber_simulation.py
+coding.py
+*.pyc
+recibido*
+epy_block*
+
+pruebas/
+Obsoleta/
+#######################################################
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
