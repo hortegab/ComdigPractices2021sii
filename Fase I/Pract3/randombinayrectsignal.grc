@@ -123,25 +123,8 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [596, 478]
+    coordinate: [576, 475]
     rotation: 0
-    state: true
-- name: analog_const_source_x_0
-  id: analog_const_source_x
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    const: '0'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    type: float
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [226, 713]
-    rotation: 180
     state: true
 - name: analog_const_source_x_0_0
   id: analog_const_source_x
@@ -247,23 +230,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [772, 653]
-    rotation: 0
-    state: true
-- name: blocks_float_to_complex_0
-  id: blocks_float_to_complex
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [264, 637]
+    coordinate: [578, 644]
     rotation: 0
     state: true
 - name: blocks_multiply_const_vxx_0
@@ -290,7 +257,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    const: '[1/N]*N'
+    const: '[1/(N*samp_rate)]*N'
     maxoutbuf: '0'
     minoutbuf: '0'
     type: float
@@ -299,7 +266,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1063, 648]
+    coordinate: [869, 639]
     rotation: 0
     state: true
 - name: blocks_null_sink_0
@@ -328,13 +295,13 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     num_items: N
-    type: complex
+    type: float
     vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [432, 655]
+    coordinate: [238, 646]
     rotation: 0
     state: true
 - name: blocks_throttle_0
@@ -380,7 +347,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [923, 655]
+    coordinate: [729, 646]
     rotation: 0
     state: true
 - name: fft_vxx_0
@@ -395,13 +362,13 @@ blocks:
     minoutbuf: '0'
     nthreads: '1'
     shift: 'True'
-    type: complex
+    type: float
     window: '[1]*N'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [571, 619]
+    coordinate: [377, 610]
     rotation: 0
     state: true
 - name: import_0
@@ -507,7 +474,7 @@ blocks:
     tr_level: '0.0'
     tr_mode: qtgui.TRIG_MODE_FREE
     tr_tag: '""'
-    type: complex
+    type: float
     units: dB
     update_time: '0.10'
     width1: '1'
@@ -527,7 +494,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [440, 762]
+    coordinate: [246, 770]
     rotation: 0
     state: true
 - name: qtgui_time_sink_x_0
@@ -669,7 +636,7 @@ blocks:
     label9: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: '"PSD"'
+    name: '"PSD (Watts/Hz)"'
     nconnections: '1'
     ref_level: '0'
     showports: 'False'
@@ -691,13 +658,13 @@ blocks:
     x_units: '"Hz"'
     y_axis_label: '"Sx(f)"'
     y_units: '"Watss/Hz"'
-    ymax: 1*Sps
+    ymax: 1/Rb
     ymin: '0'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1197, 590]
+    coordinate: [1069, 584]
     rotation: 0
     state: true
 - name: virtual_sink_0_1
@@ -736,7 +703,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [940, 331]
+    coordinate: [951, 332]
     rotation: 270
     state: enabled
 - name: virtual_source_0
@@ -749,7 +716,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [15, 508]
+    coordinate: [14, 508]
     rotation: 0
     state: true
 - name: virtual_source_0_0
@@ -767,7 +734,6 @@ blocks:
     state: true
 
 connections:
-- [analog_const_source_x_0, '0', blocks_float_to_complex_0, '1']
 - [analog_const_source_x_0_0, '0', blocks_add_xx_0, '0']
 - [analog_noise_source_x_0, '0', virtual_sink_0_1_0_0, '0']
 - [analog_random_source_x_0, '0', blocks_char_to_float_0, '0']
@@ -775,8 +741,6 @@ connections:
 - [blocks_char_to_float_0, '0', blocks_add_xx_0, '1']
 - [blocks_char_to_float_0, '0', virtual_sink_0_1, '0']
 - [blocks_complex_to_mag_squared_0, '0', epy_block_0, '0']
-- [blocks_float_to_complex_0, '0', blocks_stream_to_vector_0, '0']
-- [blocks_float_to_complex_0, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_multiply_const_vxx_0, '0', interp_fir_filter_xxx_0, '0']
 - [blocks_multiply_const_vxx_1, '0', qtgui_vector_sink_f_0, '0']
 - [blocks_stream_to_vector_0, '0', fft_vxx_0, '0']
@@ -784,7 +748,8 @@ connections:
 - [epy_block_0, '0', blocks_multiply_const_vxx_1, '0']
 - [fft_vxx_0, '0', blocks_complex_to_mag_squared_0, '0']
 - [interp_fir_filter_xxx_0, '0', blocks_throttle_0, '0']
-- [virtual_source_0, '0', blocks_float_to_complex_0, '0']
+- [virtual_source_0, '0', blocks_stream_to_vector_0, '0']
+- [virtual_source_0, '0', qtgui_freq_sink_x_0, '0']
 - [virtual_source_0, '0', qtgui_time_sink_x_0, '0']
 - [virtual_source_0_0, '0', blocks_null_sink_0, '0']
 
