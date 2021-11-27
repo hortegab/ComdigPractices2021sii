@@ -118,7 +118,7 @@ blocks:
     label7: Tab 7
     label8: Tab 8
     label9: Tab 9
-    num_tabs: '3'
+    num_tabs: '2'
   states:
     bus_sink: false
     bus_source: false

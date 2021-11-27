@@ -100,11 +100,6 @@ class prac3a(gr.top_block, Qt.QWidget):
         self.Menu_grid_layout_1 = Qt.QGridLayout()
         self.Menu_layout_1.addLayout(self.Menu_grid_layout_1)
         self.Menu.addTab(self.Menu_widget_1, 'Freq')
-        self.Menu_widget_2 = Qt.QWidget()
-        self.Menu_layout_2 = Qt.QBoxLayout(Qt.QBoxLayout.TopToBottom, self.Menu_widget_2)
-        self.Menu_grid_layout_2 = Qt.QGridLayout()
-        self.Menu_layout_2.addLayout(self.Menu_grid_layout_2)
-        self.Menu.addTab(self.Menu_widget_2, 'Time')
         self.top_grid_layout.addWidget(self.Menu)
         self.qtgui_vector_sink_f_0 = qtgui.vector_sink_f(
             N,
