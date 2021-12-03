@@ -488,7 +488,7 @@ blocks:
     legend: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: '"Dynamic Spectrum"'
+    name: '"Spectrum Analyzer"'
     nconnections: '1'
     norm_window: 'False'
     showports: 'True'
@@ -743,7 +743,7 @@ blocks:
     comment: ''
     grid: 'False'
     gui_hint: Menu@0:3,1,1,1
-    label1: ''
+    label1: PSD (Watts/Hz)
     label10: ''
     label2: ''
     label3: ''
@@ -755,7 +755,7 @@ blocks:
     label9: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: '"PSD (Watts/Hz)"'
+    name: '"PSD Analyzer"'
     nconnections: '1'
     ref_level: '0'
     showports: 'False'
