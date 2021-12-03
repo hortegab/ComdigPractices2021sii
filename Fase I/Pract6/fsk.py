@@ -7,7 +7,7 @@
 # GNU Radio Python Flow Graph
 # Title: fsk
 # Author: radiogis_director
-# GNU Radio version: v3.8.3.1-16-g9d94c8a6
+# GNU Radio version: 3.9.0.0
 
 from distutils.version import StrictVersion
 
@@ -45,12 +45,14 @@ import epy_block_0_1
 import math
 import numpy as np
 
+
+
 from gnuradio import qtgui
 
 class fsk(gr.top_block, Qt.QWidget):
 
     def __init__(self):
-        gr.top_block.__init__(self, "fsk")
+        gr.top_block.__init__(self, "fsk", catch_exceptions=True)
         Qt.QWidget.__init__(self)
         self.setWindowTitle("fsk")
         qtgui.util.check_set_qss()
@@ -90,7 +92,7 @@ class fsk(gr.top_block, Qt.QWidget):
         self.Rb = Rb = samp_rate/Sps
         self.h = h = [1]*Sps
         self.fd = fd = Rb*Cps
-        self.fc = fc = 200000000
+        self.fc = fc = 95.7e6
         self.N = N = 1024*8
         self.BW = BW = samp_rate/2
 
@@ -137,11 +139,12 @@ class fsk(gr.top_block, Qt.QWidget):
             ),
             "",
         )
-        self.uhd_usrp_sink_0.set_center_freq(fc, 0)
-        self.uhd_usrp_sink_0.set_gain(20, 0)
-        self.uhd_usrp_sink_0.set_antenna("TX/RX", 0)
         self.uhd_usrp_sink_0.set_samp_rate(samp_rate)
         # No synchronization enforced.
+
+        self.uhd_usrp_sink_0.set_center_freq(fc, 0)
+        self.uhd_usrp_sink_0.set_antenna("TX/RX", 0)
+        self.uhd_usrp_sink_0.set_gain(20, 0)
         self.qtgui_vector_sink_f_0 = qtgui.vector_sink_f(
             N,
             -samp_rate/2,
@@ -149,7 +152,8 @@ class fsk(gr.top_block, Qt.QWidget):
             "f",
             "Sx(f)",
             "PSD (Watts/Hz)",
-            1 # Number of inputs
+            1, # Number of inputs
+            None # parent
         )
         self.qtgui_vector_sink_f_0.set_update_time(0.10)
         self.qtgui_vector_sink_f_0.set_y_axis(0, 1/Rb)
@@ -187,7 +191,8 @@ class fsk(gr.top_block, Qt.QWidget):
             16*Sps, #size
             samp_rate, #samp_rate
             'CE Modulated Signal', #name
-            1 #number of inputs
+            1, #number of inputs
+            None # parent
         )
         self.qtgui_time_sink_x_0_1_0_0.set_update_time(0.10)
         self.qtgui_time_sink_x_0_1_0_0.set_y_axis(-1.5, 1.5)
@@ -241,7 +246,8 @@ class fsk(gr.top_block, Qt.QWidget):
             16*Sps, #size
             samp_rate, #samp_rate
             'Modudating Signal', #name
-            1 #number of inputs
+            1, #number of inputs
+            None # parent
         )
         self.qtgui_time_sink_x_0_1.set_update_time(0.10)
         self.qtgui_time_sink_x_0_1.set_y_axis(-1.5, 1.5)
@@ -292,7 +298,8 @@ class fsk(gr.top_block, Qt.QWidget):
             16, #size
             Rb, #samp_rate
             "Message bipolar", #name
-            1 #number of inputs
+            1, #number of inputs
+            None # parent
         )
         self.qtgui_time_sink_x_0_0.set_update_time(0.10)
         self.qtgui_time_sink_x_0_0.set_y_axis(-1.5, 1.5)
@@ -342,7 +349,8 @@ class fsk(gr.top_block, Qt.QWidget):
         self.qtgui_const_sink_x_0 = qtgui.const_sink_c(
             1024, #size
             "CE-Constellation", #name
-            1 #number of inputs
+            1, #number of inputs
+            None # parent
         )
         self.qtgui_const_sink_x_0.set_update_time(0.10)
         self.qtgui_const_sink_x_0.set_y_axis(-2, 2)
@@ -400,6 +408,7 @@ class fsk(gr.top_block, Qt.QWidget):
         self.analog_const_source_x_0 = analog.sig_source_f(0, analog.GR_CONST_WAVE, 0, 0, 0.7)
 
 
+
         ##################################################
         # Connections
         ##################################################
@@ -427,6 +436,9 @@ class fsk(gr.top_block, Qt.QWidget):
     def closeEvent(self, event):
         self.settings = Qt.QSettings("GNU Radio", "fsk")
         self.settings.setValue("geometry", self.saveGeometry())
+        self.stop()
+        self.wait()
+
         event.accept()
 
     def get_Spc(self):
@@ -515,7 +527,6 @@ class fsk(gr.top_block, Qt.QWidget):
 
 
 
-
 def main(top_block_cls=fsk, options=None):
 
     if StrictVersion("4.5.0") <= StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
@@ -530,6 +541,9 @@ def main(top_block_cls=fsk, options=None):
     tb.show()
 
     def sig_handler(sig=None, frame=None):
+        tb.stop()
+        tb.wait()
+
         Qt.QApplication.quit()
 
     signal.signal(signal.SIGINT, sig_handler)
@@ -539,11 +553,6 @@ def main(top_block_cls=fsk, options=None):
     timer.start(500)
     timer.timeout.connect(lambda: None)
 
-    def quitting():
-        tb.stop()
-        tb.wait()
-
-    qapp.aboutToQuit.connect(quitting)
     qapp.exec_()
 
 if __name__ == '__main__':
