@@ -30,6 +30,7 @@ from PyQt5 import Qt
 from gnuradio import qtgui
 from gnuradio.filter import firdes
 import sip
+from b_Eye_Diagram_simple_c import b_Eye_Diagram_simple_c  # grc-generated hier_block
 from b_demod_constelacion_cb import b_demod_constelacion_cb  # grc-generated hier_block
 from b_diez_cc import b_diez_cc  # grc-generated hier_block
 from gnuradio import analog
@@ -572,60 +573,6 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
             self.menu_grid_layout_1.setRowStretch(r, 1)
         for c in range(0, 1):
             self.menu_grid_layout_1.setColumnStretch(c, 1)
-        self.qtgui_eye_sink_x_0 = qtgui.eye_sink_c(
-            1024, #size
-            samp_rate, #samp_rate
-            2, #number of inputs
-            None
-        )
-        self.qtgui_eye_sink_x_0.set_update_time(0.10)
-        self.qtgui_eye_sink_x_0.set_samp_per_symbol(Sps)
-        self.qtgui_eye_sink_x_0.set_y_axis(-1.4, 1.4)
-
-        self.qtgui_eye_sink_x_0.set_y_label('Amplitude', "")
-
-        self.qtgui_eye_sink_x_0.enable_tags(True)
-        self.qtgui_eye_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
-        self.qtgui_eye_sink_x_0.enable_autoscale(False)
-        self.qtgui_eye_sink_x_0.enable_grid(False)
-        self.qtgui_eye_sink_x_0.enable_axis_labels(True)
-        self.qtgui_eye_sink_x_0.enable_control_panel(False)
-
-
-        labels = ['p1 (Re)', 'p1 (Im)', 'Signal 3', 'Signal 4', 'Signal 5',
-            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
-        widths = [4, 4, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        colors = ['blue', 'blue', 'blue', 'blue', 'blue',
-            'blue', 'blue', 'blue', 'blue', 'blue']
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
-        styles = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        markers = [-1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1]
-
-
-        for i in range(4):
-            if len(labels[i]) == 0:
-                if (i % 2 == 0):
-                    self.qtgui_eye_sink_x_0.set_line_label(i, "Eye [Re{{Data {0}}}]".format(round(i/2)))
-                else:
-                    self.qtgui_eye_sink_x_0.set_line_label(i, "Eye [Im{{Data {0}}}]".format(round((i-1)/2)))
-            else:
-                self.qtgui_eye_sink_x_0.set_line_label(i, labels[i])
-            self.qtgui_eye_sink_x_0.set_line_width(i, widths[i])
-            self.qtgui_eye_sink_x_0.set_line_color(i, colors[i])
-            self.qtgui_eye_sink_x_0.set_line_style(i, styles[i])
-            self.qtgui_eye_sink_x_0.set_line_marker(i, markers[i])
-            self.qtgui_eye_sink_x_0.set_line_alpha(i, alphas[i])
-
-        self._qtgui_eye_sink_x_0_win = sip.wrapinstance(self.qtgui_eye_sink_x_0.qwidget(), Qt.QWidget)
-        self.menu_grid_layout_2.addWidget(self._qtgui_eye_sink_x_0_win, 1, 0, 1, 1)
-        for r in range(1, 2):
-            self.menu_grid_layout_2.setRowStretch(r, 1)
-        for c in range(0, 1):
-            self.menu_grid_layout_2.setColumnStretch(c, 1)
         self.qtgui_const_sink_x_1 = qtgui.const_sink_c(
             1024, #size
             "", #name
@@ -888,6 +835,42 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.b_demod_constelacion_cb_0 = b_demod_constelacion_cb(
             Constelacion=constelacion,
         )
+        self.b_Eye_Diagram_simple_c_0_0 = b_Eye_Diagram_simple_c(
+            AlphaLineas=0.5,
+            Delay_i=0,
+            GrosorLineas=20,
+            Kint=1,
+            N_eyes=2,
+            Samprate1=samp_rate,
+            Sps1=Sps,
+            Title="p1",
+            Ymax=2,
+            Ymin=-2,
+        )
+
+        self.menu_grid_layout_2.addWidget(self.b_Eye_Diagram_simple_c_0_0, 3, 0, 1, 1)
+        for r in range(3, 4):
+            self.menu_grid_layout_2.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.menu_grid_layout_2.setColumnStretch(c, 1)
+        self.b_Eye_Diagram_simple_c_0 = b_Eye_Diagram_simple_c(
+            AlphaLineas=0.5,
+            Delay_i=0,
+            GrosorLineas=20,
+            Kint=1,
+            N_eyes=2,
+            Samprate1=samp_rate,
+            Sps1=Sps,
+            Title="p1",
+            Ymax=2,
+            Ymin=-2,
+        )
+
+        self.menu_grid_layout_2.addWidget(self.b_Eye_Diagram_simple_c_0, 2, 0, 1, 1)
+        for r in range(2, 3):
+            self.menu_grid_layout_2.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.menu_grid_layout_2.setColumnStretch(c, 1)
         self.analog_random_source_x_0 = blocks.vector_source_b(list(map(int, numpy.random.randint(0, 2, 1000))), True)
         self.analog_noise_source_x_0 = analog.noise_source_c(analog.GR_GAUSSIAN, math.sqrt(Pn), 0)
         self.analog_agc3_xx_0 = analog.agc3_cc(1e-3, 1e-4, 1.0, 1.0, 1)
@@ -929,8 +912,8 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_complex_to_float_0, 1), (self.qtgui_time_sink_x_0_0, 0))
         self.connect((self.blocks_complex_to_float_0_0, 0), (self.qtgui_time_sink_x_0, 1))
         self.connect((self.blocks_complex_to_float_0_0, 1), (self.qtgui_time_sink_x_0_0, 1))
-        self.connect((self.blocks_delay_0, 0), (self.qtgui_eye_sink_x_0, 0))
-        self.connect((self.blocks_delay_0, 1), (self.qtgui_eye_sink_x_0, 1))
+        self.connect((self.blocks_delay_0, 0), (self.b_Eye_Diagram_simple_c_0, 0))
+        self.connect((self.blocks_delay_0, 1), (self.b_Eye_Diagram_simple_c_0_0, 0))
         self.connect((self.blocks_delay_1_0, 0), (self.qtgui_time_sink_x_1, 0))
         self.connect((self.blocks_delay_1_0_0, 0), (self.blocks_char_to_float_0, 0))
         self.connect((self.blocks_delay_1_0_0_0, 0), (self.blocks_char_to_float_0_1, 0))
@@ -982,9 +965,10 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.set_ntaps(16*self.Sps)
         self.set_retardo_propag(self.Sps)
         self.set_samp_rate(self.Rs*self.Sps)
+        self.b_Eye_Diagram_simple_c_0.set_Sps1(self.Sps)
+        self.b_Eye_Diagram_simple_c_0_0.set_Sps1(self.Sps)
         self.b_diez_cc_0.set_N(self.Sps)
         self.blocks_multiply_const_vxx_0.set_k(1/self.Sps)
-        self.qtgui_eye_sink_x_0.set_samp_per_symbol(self.Sps)
 
     def get_Rs(self):
         return self.Rs
@@ -1002,7 +986,8 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.set_Fmax(self.samp_rate/2)
-        self.qtgui_eye_sink_x_0.set_samp_rate(self.samp_rate)
+        self.b_Eye_Diagram_simple_c_0.set_Samprate1(self.samp_rate)
+        self.b_Eye_Diagram_simple_c_0_0.set_Samprate1(self.samp_rate)
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.qtgui_freq_sink_x_0_0.set_frequency_range(0, self.samp_rate)
         self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
