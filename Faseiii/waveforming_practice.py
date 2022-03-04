@@ -30,8 +30,12 @@ from PyQt5 import Qt
 from gnuradio import qtgui
 from gnuradio.filter import firdes
 import sip
+from b_FLL_tunner2 import b_FLL_tunner2  # grc-generated hier_block
 from b_demod_constelacion_cb import b_demod_constelacion_cb  # grc-generated hier_block
 from b_diez_cc import b_diez_cc  # grc-generated hier_block
+from b_diezmador_ff import b_diezmador_ff  # grc-generated hier_block
+from b_meter_power_cc import b_meter_power_cc  # grc-generated hier_block
+from b_upconverter_cf import b_upconverter_cf  # grc-generated hier_block
 from gnuradio import analog
 from gnuradio import blocks
 import numpy
@@ -47,6 +51,7 @@ from gnuradio import eng_notation
 from gnuradio.qtgui import Range, RangeWidget
 from PyQt5 import QtCore
 import math
+import numpy as np
 import random
 import waveforming_practice_epy_block_0 as epy_block_0  # embedded python block
 import waveforming_practice_wform as wform  # embedded python module
@@ -91,21 +96,26 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.constelacion = constelacion = digital.constellation_16qam().points()
-        self.Sps = Sps = 16
+        self.constelacion = constelacion = digital.constellation_qpsk().points()
+        self.Sps = Sps = 8
         self.Rs = Rs = 32000
         self.samp_rate = samp_rate = Rs*Sps
         self.M = M = len(constelacion )
-        self.ntaps = ntaps = 16*Sps
         self.bps = bps = int(math.log(M,2))
-        self.beta = beta = 1
         self.Fmax = Fmax = samp_rate/2
-        self.retardo_propag = retardo_propag = Sps
-        self.h = h = wform.rrcos(Sps,ntaps,beta)
-        self.Timing = Timing = 0
+        self.retardo_propag = retardo_propag = 1
+        self.ntaps = ntaps = 16*Sps
+        self.h = h = [1]*Sps
+        self.fading = fading = 1
+        self.ch_freq = ch_freq = 0
+        self.beta = beta = 1
+        self.Timing = Timing = 1
         self.Rb = Rb = Rs*bps
         self.Pn = Pn = 0.05
+        self.Gain_USRP_Tx_dB = Gain_USRP_Tx_dB = 30.
+        self.Gain_USRP_Rx_dB = Gain_USRP_Rx_dB = 20
         self.Delay_eye = Delay_eye = 0
+        self.Ch_phase = Ch_phase = 0
         self.BW_filtro = BW_filtro = Fmax
 
         ##################################################
@@ -147,19 +157,38 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.menu_grid_layout_6 = Qt.QGridLayout()
         self.menu_layout_6.addLayout(self.menu_grid_layout_6)
         self.menu.addTab(self.menu_widget_6, 'Bits')
-        self.top_grid_layout.addWidget(self.menu, 4, 0, 1, 1)
-        for r in range(4, 5):
+        self.menu_widget_7 = Qt.QWidget()
+        self.menu_layout_7 = Qt.QBoxLayout(Qt.QBoxLayout.TopToBottom, self.menu_widget_7)
+        self.menu_grid_layout_7 = Qt.QGridLayout()
+        self.menu_layout_7.addLayout(self.menu_grid_layout_7)
+        self.menu.addTab(self.menu_widget_7, 'RF')
+        self.top_grid_layout.addWidget(self.menu, 10, 0, 1, 2)
+        for r in range(10, 11):
             self.top_grid_layout.setRowStretch(r, 1)
-        for c in range(0, 1):
+        for c in range(0, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self._retardo_propag_range = Range(0, Sps*ntaps, 1, Sps, 200)
-        self._retardo_propag_win = RangeWidget(self._retardo_propag_range, self.set_retardo_propag, "retardo_propag", "counter_slider", int, QtCore.Qt.Horizontal)
+        self._retardo_propag_range = Range(0, Sps*ntaps, 1, 1, 200)
+        self._retardo_propag_win = RangeWidget(self._retardo_propag_range, self.set_retardo_propag, "Delay_Propagation_Compensation", "counter_slider", int, QtCore.Qt.Horizontal)
         self.menu_grid_layout_4.addWidget(self._retardo_propag_win, 0, 0, 1, 1)
         for r in range(0, 1):
             self.menu_grid_layout_4.setRowStretch(r, 1)
         for c in range(0, 1):
             self.menu_grid_layout_4.setColumnStretch(c, 1)
-        self._Timing_range = Range(0, Sps-1, 1, 0, 200)
+        self._fading_range = Range(0, 1, 1/100, 1, 200)
+        self._fading_win = RangeWidget(self._fading_range, self.set_fading, "fading", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._fading_win, 2, 1, 1, 1)
+        for r in range(2, 3):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._ch_freq_range = Range(0, 100, 1/100, 0, 200)
+        self._ch_freq_win = RangeWidget(self._ch_freq_range, self.set_ch_freq, "ch_freq", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._ch_freq_win, 1, 1, 1, 1)
+        for r in range(1, 2):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._Timing_range = Range(0, Sps-1, 1, 1, 200)
         self._Timing_win = RangeWidget(self._Timing_range, self.set_Timing, "Timing", "counter_slider", int, QtCore.Qt.Horizontal)
         self.menu_grid_layout_4.addWidget(self._Timing_win, 1, 0, 1, 1)
         for r in range(1, 2):
@@ -180,6 +209,65 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self._Ch_phase_range = Range(0, math.pi*2, 1/100, 0, 200)
+        self._Ch_phase_win = RangeWidget(self._Ch_phase_range, self.set_Ch_phase, "Ch_phase", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._Ch_phase_win, 0, 1, 1, 1)
+        for r in range(0, 1):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self.qtgui_time_sink_x_3 = qtgui.time_sink_f(
+            1024, #size
+            samp_rate, #samp_rate
+            "Power meter (dB)", #name
+            1, #number of inputs
+            None # parent
+        )
+        self.qtgui_time_sink_x_3.set_update_time(0.10)
+        self.qtgui_time_sink_x_3.set_y_axis(-20, 6)
+
+        self.qtgui_time_sink_x_3.set_y_label('Amplitude', "")
+
+        self.qtgui_time_sink_x_3.enable_tags(True)
+        self.qtgui_time_sink_x_3.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.qtgui_time_sink_x_3.enable_autoscale(False)
+        self.qtgui_time_sink_x_3.enable_grid(False)
+        self.qtgui_time_sink_x_3.enable_axis_labels(True)
+        self.qtgui_time_sink_x_3.enable_control_panel(False)
+        self.qtgui_time_sink_x_3.enable_stem_plot(False)
+
+
+        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
+            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
+        widths = [3, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_time_sink_x_3.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_time_sink_x_3.set_line_label(i, labels[i])
+            self.qtgui_time_sink_x_3.set_line_width(i, widths[i])
+            self.qtgui_time_sink_x_3.set_line_color(i, colors[i])
+            self.qtgui_time_sink_x_3.set_line_style(i, styles[i])
+            self.qtgui_time_sink_x_3.set_line_marker(i, markers[i])
+            self.qtgui_time_sink_x_3.set_line_alpha(i, alphas[i])
+
+        self._qtgui_time_sink_x_3_win = sip.wrapinstance(self.qtgui_time_sink_x_3.qwidget(), Qt.QWidget)
+        self.menu_grid_layout_4.addWidget(self._qtgui_time_sink_x_3_win, 2, 1, 1, 1)
+        for r in range(2, 3):
+            self.menu_grid_layout_4.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.menu_grid_layout_4.setColumnStretch(c, 1)
         self.qtgui_time_sink_x_2_0 = qtgui.time_sink_f(
             32*bps, #size
             Rb, #samp_rate
@@ -339,6 +427,58 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
             self.menu_grid_layout_4.setRowStretch(r, 1)
         for c in range(0, 2):
             self.menu_grid_layout_4.setColumnStretch(c, 1)
+        self.qtgui_time_sink_x_0_0_0 = qtgui.time_sink_f(
+            8*Sps, #size
+            samp_rate, #samp_rate
+            "", #name
+            1, #number of inputs
+            None # parent
+        )
+        self.qtgui_time_sink_x_0_0_0.set_update_time(0.10)
+        self.qtgui_time_sink_x_0_0_0.set_y_axis(-2, 2)
+
+        self.qtgui_time_sink_x_0_0_0.set_y_label('Amplitude', "")
+
+        self.qtgui_time_sink_x_0_0_0.enable_tags(True)
+        self.qtgui_time_sink_x_0_0_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.qtgui_time_sink_x_0_0_0.enable_autoscale(False)
+        self.qtgui_time_sink_x_0_0_0.enable_grid(False)
+        self.qtgui_time_sink_x_0_0_0.enable_axis_labels(True)
+        self.qtgui_time_sink_x_0_0_0.enable_control_panel(False)
+        self.qtgui_time_sink_x_0_0_0.enable_stem_plot(False)
+
+
+        labels = ['RF', 'r1 (Im)', 'Signal 3', 'Signal 4', 'Signal 5',
+            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
+        widths = [3, 3, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['red', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_time_sink_x_0_0_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_time_sink_x_0_0_0.set_line_label(i, labels[i])
+            self.qtgui_time_sink_x_0_0_0.set_line_width(i, widths[i])
+            self.qtgui_time_sink_x_0_0_0.set_line_color(i, colors[i])
+            self.qtgui_time_sink_x_0_0_0.set_line_style(i, styles[i])
+            self.qtgui_time_sink_x_0_0_0.set_line_marker(i, markers[i])
+            self.qtgui_time_sink_x_0_0_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_time_sink_x_0_0_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0_0_0.qwidget(), Qt.QWidget)
+        self.menu_grid_layout_7.addWidget(self._qtgui_time_sink_x_0_0_0_win, 2, 0, 1, 1)
+        for r in range(2, 3):
+            self.menu_grid_layout_7.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.menu_grid_layout_7.setColumnStretch(c, 1)
         self.qtgui_time_sink_x_0_0 = qtgui.time_sink_f(
             16*Sps, #size
             samp_rate, #samp_rate
@@ -347,7 +487,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
             None # parent
         )
         self.qtgui_time_sink_x_0_0.set_update_time(0.10)
-        self.qtgui_time_sink_x_0_0.set_y_axis(-1.5, 1.5)
+        self.qtgui_time_sink_x_0_0.set_y_axis(-2, 2)
 
         self.qtgui_time_sink_x_0_0.set_y_label('Amplitude', "")
 
@@ -360,7 +500,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_0_0.enable_stem_plot(False)
 
 
-        labels = ['p1 (Im)', 'r1 (Im)', 'Signal 3', 'Signal 4', 'Signal 5',
+        labels = ['r0 (Im)', 'r1 (Im)', 'Signal 3', 'Signal 4', 'Signal 5',
             'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
         widths = [3, 3, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -399,7 +539,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
             None # parent
         )
         self.qtgui_time_sink_x_0.set_update_time(0.10)
-        self.qtgui_time_sink_x_0.set_y_axis(-1.5, 1.5)
+        self.qtgui_time_sink_x_0.set_y_axis(-2, 2)
 
         self.qtgui_time_sink_x_0.set_y_label('Amplitude', "")
 
@@ -412,7 +552,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_0.enable_stem_plot(False)
 
 
-        labels = ['p1 (Re)', 'r1 (Re)', 'Signal 3', 'Signal 4', 'Signal 5',
+        labels = ['r0 (Re)', 'r1 (Re)', 'Signal 3', 'Signal 4', 'Signal 5',
             'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
         widths = [3, 3, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -502,7 +642,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
 
 
 
-        labels = ['Ruido', '', '', '', '',
+        labels = ['t3', '', '', '', '',
             '', '', '', '', '']
         widths = [3, 1, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -548,7 +688,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
 
 
 
-        labels = ['p1', 'r1', '', '', '',
+        labels = ['r0', 'r1', '', '', '',
             '', '', '', '', '']
         widths = [3, 3, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -580,7 +720,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         )
         self.qtgui_eye_sink_x_0.set_update_time(0.10)
         self.qtgui_eye_sink_x_0.set_samp_per_symbol(Sps)
-        self.qtgui_eye_sink_x_0.set_y_axis(-1.4, 1.4)
+        self.qtgui_eye_sink_x_0.set_y_axis(-1.8, 1.8)
 
         self.qtgui_eye_sink_x_0.set_y_label('Amplitude', "")
 
@@ -592,7 +732,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.qtgui_eye_sink_x_0.enable_control_panel(False)
 
 
-        labels = ['p1 (Re)', 'p1 (Im)', 'Signal 3', 'Signal 4', 'Signal 5',
+        labels = ['r0 (Re)', 'r0 (Im)', 'Signal 3', 'Signal 4', 'Signal 5',
             'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
         widths = [4, 4, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -731,7 +871,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.qtgui_const_sink_x_0_1.enable_axis_labels(True)
 
 
-        labels = ['p2 (Ruido)', '', '', '', '',
+        labels = ['t3', '', '', '', '',
             '', '', '', '', '']
         widths = [1, 1, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -768,15 +908,15 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
             None # parent
         )
         self.qtgui_const_sink_x_0_0.set_update_time(0.10)
-        self.qtgui_const_sink_x_0_0.set_y_axis(-1.5, 1.5)
-        self.qtgui_const_sink_x_0_0.set_x_axis(-1.5, 1.5)
+        self.qtgui_const_sink_x_0_0.set_y_axis(-2, 2)
+        self.qtgui_const_sink_x_0_0.set_x_axis(-2, 2)
         self.qtgui_const_sink_x_0_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, "")
         self.qtgui_const_sink_x_0_0.enable_autoscale(False)
         self.qtgui_const_sink_x_0_0.enable_grid(False)
         self.qtgui_const_sink_x_0_0.enable_axis_labels(True)
 
 
-        labels = ['p1 (Vista continua)', 'r1 (Vista continua)', '', '', '',
+        labels = ['r0 (Vista continua)', 'r1 (Vista continua)', '', '', '',
             '', '', '', '', '']
         widths = [3, 1, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -813,15 +953,15 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
             None # parent
         )
         self.qtgui_const_sink_x_0.set_update_time(0.10)
-        self.qtgui_const_sink_x_0.set_y_axis(-1.5, 1.5)
-        self.qtgui_const_sink_x_0.set_x_axis(-1.5, 1.5)
+        self.qtgui_const_sink_x_0.set_y_axis(-2, 2)
+        self.qtgui_const_sink_x_0.set_x_axis(-2, 2)
         self.qtgui_const_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, "")
         self.qtgui_const_sink_x_0.enable_autoscale(False)
         self.qtgui_const_sink_x_0.enable_grid(False)
         self.qtgui_const_sink_x_0.enable_axis_labels(True)
 
 
-        labels = ['p1 (Vista discreta)', 'r1 (Vista discreta)', '', '', '',
+        labels = ['r0 (Vista discreta)', 'r1 (Vista discreta)', '', '', '',
             '', '', '', '', '']
         widths = [1, 1, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -857,16 +997,24 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.interp_fir_filter_xxx_0.declare_sample_delay(0)
         self.fec_ber_bf_0 = fec.ber_bf(False, 100, -7.0)
         self.epy_block_0 = epy_block_0.inversedB()
+        self.digital_diff_encoder_bb_0 = digital.diff_encoder_bb(M, digital.DIFF_DIFFERENTIAL)
+        self.digital_diff_decoder_bb_0 = digital.diff_decoder_bb(M, digital.DIFF_DIFFERENTIAL)
         self.digital_chunks_to_symbols_xx_0 = digital.chunks_to_symbols_bc(constelacion, 1)
         self.blocks_unpacked_to_packed_xx_0 = blocks.unpacked_to_packed_bb(bps, gr.GR_MSB_FIRST)
         self.blocks_unpack_k_bits_bb_0 = blocks.unpack_k_bits_bb(8)
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
         self.blocks_packed_to_unpacked_xx_0 = blocks.packed_to_unpacked_bb(bps, gr.GR_MSB_FIRST)
         self.blocks_pack_k_bits_bb_0 = blocks.pack_k_bits_bb(8)
+        self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_float*1)
+        self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
+        self.blocks_multiply_const_vxx_1_0_0 = blocks.multiply_const_cc(0.7)
+        self.blocks_multiply_const_vxx_1_0 = blocks.multiply_const_cc(fading)
+        self.blocks_multiply_const_vxx_1 = blocks.multiply_const_cc(np.exp(1j*Ch_phase))
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(1/Sps)
         self.blocks_delay_1_0_0_0 = blocks.delay(gr.sizeof_char*1, retardo_propag*bps)
         self.blocks_delay_1_0_0 = blocks.delay(gr.sizeof_char*1, retardo_propag)
         self.blocks_delay_1_0 = blocks.delay(gr.sizeof_gr_complex*1, retardo_propag)
+        self.blocks_delay_1 = blocks.delay(gr.sizeof_gr_complex*1, 0)
         self.blocks_delay_0 = blocks.delay(gr.sizeof_gr_complex*1, Delay_eye)
         self.blocks_complex_to_float_0_0 = blocks.complex_to_float(1)
         self.blocks_complex_to_float_0 = blocks.complex_to_float(1)
@@ -882,6 +1030,16 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.b_upconverter_cf_0 = b_upconverter_cf(
+            Fc=Rs*2,
+            samp_rate=samp_rate,
+        )
+        self.b_meter_power_cc_0 = b_meter_power_cc(
+            G_prom=0.0001,
+        )
+        self.b_diezmador_ff_0 = b_diezmador_ff(
+            Paso=1000,
+        )
         self.b_diez_cc_0 = b_diez_cc(
             M=Timing,
             N=Sps,
@@ -889,10 +1047,28 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.b_demod_constelacion_cb_0 = b_demod_constelacion_cb(
             Constelacion=constelacion,
         )
+        self.b_FLL_tunner2_0 = b_FLL_tunner2(
+            Constellation=constelacion,
+        )
+        self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, ch_freq, 1, 0, 0)
         self.analog_random_source_x_0 = blocks.vector_source_b(list(map(int, numpy.random.randint(0, 2, 1000))), True)
         self.analog_noise_source_x_0 = analog.noise_source_c(analog.GR_GAUSSIAN, math.sqrt(Pn), 0)
         self.analog_agc3_xx_0 = analog.agc3_cc(1e-3, 1e-4, 1.0, 1.0, 1)
         self.analog_agc3_xx_0.set_max_gain(65536)
+        self._Gain_USRP_Tx_dB_range = Range(0., 130, 1, 30., 200)
+        self._Gain_USRP_Tx_dB_win = RangeWidget(self._Gain_USRP_Tx_dB_range, self.set_Gain_USRP_Tx_dB, "Gain_USRP_Tx (dB)", "counter", float, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._Gain_USRP_Tx_dB_win, 3, 1, 1, 1)
+        for r in range(3, 4):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._Gain_USRP_Rx_dB_range = Range(0., 130, 1, 20, 200)
+        self._Gain_USRP_Rx_dB_win = RangeWidget(self._Gain_USRP_Rx_dB_range, self.set_Gain_USRP_Rx_dB, "Gain_USRP_Rx (dB)", "counter", float, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._Gain_USRP_Rx_dB_win, 4, 1, 1, 1)
+        for r in range(4, 5):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self._BW_filtro_range = Range(0, Fmax, Fmax/100, Fmax, 200)
         self._BW_filtro_win = RangeWidget(self._BW_filtro_range, self.set_BW_filtro, "'BW_filtro'", "counter_slider", float, QtCore.Qt.Horizontal)
         self.top_grid_layout.addWidget(self._BW_filtro_win, 0, 0, 1, 1)
@@ -905,23 +1081,24 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.analog_agc3_xx_0, 0), (self.b_demod_constelacion_cb_0, 0))
-        self.connect((self.analog_agc3_xx_0, 0), (self.qtgui_const_sink_x_1, 0))
-        self.connect((self.analog_agc3_xx_0, 0), (self.qtgui_time_sink_x_1, 1))
+        self.connect((self.analog_agc3_xx_0, 0), (self.b_FLL_tunner2_0, 0))
         self.connect((self.analog_noise_source_x_0, 0), (self.blocks_add_xx_0, 0))
-        self.connect((self.analog_noise_source_x_0, 0), (self.qtgui_const_sink_x_0_1, 0))
-        self.connect((self.analog_noise_source_x_0, 0), (self.qtgui_freq_sink_x_0_0, 0))
         self.connect((self.analog_random_source_x_0, 0), (self.blocks_delay_1_0_0_0, 0))
         self.connect((self.analog_random_source_x_0, 0), (self.blocks_pack_k_bits_bb_0, 0))
-        self.connect((self.b_demod_constelacion_cb_0, 0), (self.blocks_char_to_float_0_0, 0))
-        self.connect((self.b_demod_constelacion_cb_0, 0), (self.blocks_unpacked_to_packed_xx_0, 0))
+        self.connect((self.analog_sig_source_x_0, 0), (self.blocks_multiply_xx_0, 1))
+        self.connect((self.b_FLL_tunner2_0, 0), (self.b_demod_constelacion_cb_0, 0))
+        self.connect((self.b_FLL_tunner2_0, 0), (self.qtgui_const_sink_x_0_1, 0))
+        self.connect((self.b_FLL_tunner2_0, 0), (self.qtgui_const_sink_x_1, 0))
+        self.connect((self.b_FLL_tunner2_0, 0), (self.qtgui_freq_sink_x_0_0, 0))
+        self.connect((self.b_FLL_tunner2_0, 0), (self.qtgui_time_sink_x_1, 1))
+        self.connect((self.b_demod_constelacion_cb_0, 0), (self.digital_diff_decoder_bb_0, 0))
         self.connect((self.b_diez_cc_0, 0), (self.analog_agc3_xx_0, 0))
-        self.connect((self.blocks_add_xx_0, 0), (self.blocks_complex_to_float_0, 0))
-        self.connect((self.blocks_add_xx_0, 0), (self.blocks_delay_0, 0))
-        self.connect((self.blocks_add_xx_0, 0), (self.interp_fir_filter_xxx_0_0, 0))
-        self.connect((self.blocks_add_xx_0, 0), (self.qtgui_const_sink_x_0, 0))
-        self.connect((self.blocks_add_xx_0, 0), (self.qtgui_const_sink_x_0_0, 0))
-        self.connect((self.blocks_add_xx_0, 0), (self.qtgui_freq_sink_x_0, 0))
+        self.connect((self.b_diezmador_ff_0, 0), (self.qtgui_time_sink_x_3, 0))
+        self.connect((self.b_meter_power_cc_0, 1), (self.b_diezmador_ff_0, 0))
+        self.connect((self.b_meter_power_cc_0, 2), (self.blocks_null_sink_0, 1))
+        self.connect((self.b_meter_power_cc_0, 0), (self.blocks_null_sink_0, 0))
+        self.connect((self.b_upconverter_cf_0, 0), (self.qtgui_time_sink_x_0_0_0, 0))
+        self.connect((self.blocks_add_xx_0, 0), (self.blocks_delay_1, 0))
         self.connect((self.blocks_char_to_float_0, 0), (self.qtgui_time_sink_x_2, 0))
         self.connect((self.blocks_char_to_float_0_0, 0), (self.qtgui_time_sink_x_2, 1))
         self.connect((self.blocks_char_to_float_0_0_0, 0), (self.qtgui_time_sink_x_2_0, 1))
@@ -932,6 +1109,14 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_complex_to_float_0_0, 1), (self.qtgui_time_sink_x_0_0, 1))
         self.connect((self.blocks_delay_0, 1), (self.qtgui_eye_sink_x_0, 1))
         self.connect((self.blocks_delay_0, 0), (self.qtgui_eye_sink_x_0, 0))
+        self.connect((self.blocks_delay_1, 0), (self.b_meter_power_cc_0, 0))
+        self.connect((self.blocks_delay_1, 0), (self.b_upconverter_cf_0, 0))
+        self.connect((self.blocks_delay_1, 0), (self.blocks_complex_to_float_0, 0))
+        self.connect((self.blocks_delay_1, 0), (self.blocks_delay_0, 0))
+        self.connect((self.blocks_delay_1, 0), (self.interp_fir_filter_xxx_0_0, 0))
+        self.connect((self.blocks_delay_1, 0), (self.qtgui_const_sink_x_0, 0))
+        self.connect((self.blocks_delay_1, 0), (self.qtgui_const_sink_x_0_0, 0))
+        self.connect((self.blocks_delay_1, 0), (self.qtgui_freq_sink_x_0, 0))
         self.connect((self.blocks_delay_1_0, 0), (self.qtgui_time_sink_x_1, 0))
         self.connect((self.blocks_delay_1_0_0, 0), (self.blocks_char_to_float_0, 0))
         self.connect((self.blocks_delay_1_0_0_0, 0), (self.blocks_char_to_float_0_1, 0))
@@ -942,16 +1127,23 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.qtgui_const_sink_x_0, 1))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.qtgui_const_sink_x_0_0, 1))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.qtgui_freq_sink_x_0, 1))
+        self.connect((self.blocks_multiply_const_vxx_1, 0), (self.blocks_add_xx_0, 1))
+        self.connect((self.blocks_multiply_const_vxx_1_0, 0), (self.blocks_multiply_xx_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_1_0_0, 0), (self.interp_fir_filter_xxx_0, 0))
+        self.connect((self.blocks_multiply_xx_0, 0), (self.blocks_multiply_const_vxx_1, 0))
         self.connect((self.blocks_pack_k_bits_bb_0, 0), (self.blocks_packed_to_unpacked_xx_0, 0))
         self.connect((self.blocks_packed_to_unpacked_xx_0, 0), (self.blocks_delay_1_0_0, 0))
-        self.connect((self.blocks_packed_to_unpacked_xx_0, 0), (self.digital_chunks_to_symbols_xx_0, 0))
-        self.connect((self.blocks_throttle_0, 0), (self.blocks_add_xx_0, 1))
+        self.connect((self.blocks_packed_to_unpacked_xx_0, 0), (self.digital_diff_encoder_bb_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.blocks_multiply_const_vxx_1_0, 0))
         self.connect((self.blocks_unpack_k_bits_bb_0, 0), (self.blocks_char_to_float_0_0_0, 0))
         self.connect((self.blocks_unpack_k_bits_bb_0, 0), (self.fec_ber_bf_0, 1))
         self.connect((self.blocks_unpacked_to_packed_xx_0, 0), (self.blocks_unpack_k_bits_bb_0, 0))
         self.connect((self.digital_chunks_to_symbols_xx_0, 0), (self.blocks_delay_1_0, 0))
-        self.connect((self.digital_chunks_to_symbols_xx_0, 0), (self.interp_fir_filter_xxx_0, 0))
+        self.connect((self.digital_chunks_to_symbols_xx_0, 0), (self.blocks_multiply_const_vxx_1_0_0, 0))
         self.connect((self.digital_chunks_to_symbols_xx_0, 0), (self.qtgui_const_sink_x_0_1_0, 0))
+        self.connect((self.digital_diff_decoder_bb_0, 0), (self.blocks_char_to_float_0_0, 0))
+        self.connect((self.digital_diff_decoder_bb_0, 0), (self.blocks_unpacked_to_packed_xx_0, 0))
+        self.connect((self.digital_diff_encoder_bb_0, 0), (self.digital_chunks_to_symbols_xx_0, 0))
         self.connect((self.epy_block_0, 0), (self.qtgui_number_sink_0, 0))
         self.connect((self.fec_ber_bf_0, 0), (self.epy_block_0, 0))
         self.connect((self.interp_fir_filter_xxx_0, 0), (self.blocks_throttle_0, 0))
@@ -972,6 +1164,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
     def set_constelacion(self, constelacion):
         self.constelacion = constelacion
         self.set_M(len(self.constelacion ))
+        self.b_FLL_tunner2_0.set_Constellation(self.constelacion)
         self.b_demod_constelacion_cb_0.set_Constelacion(self.constelacion)
         self.digital_chunks_to_symbols_xx_0.set_symbol_table(self.constelacion)
 
@@ -980,9 +1173,8 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
 
     def set_Sps(self, Sps):
         self.Sps = Sps
-        self.set_h(wform.rrcos(self.Sps,self.ntaps,self.beta))
+        self.set_h([1]*self.Sps)
         self.set_ntaps(16*self.Sps)
-        self.set_retardo_propag(self.Sps)
         self.set_samp_rate(self.Rs*self.Sps)
         self.b_diez_cc_0.set_N(self.Sps)
         self.blocks_multiply_const_vxx_0.set_k(1/self.Sps)
@@ -995,6 +1187,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.Rs = Rs
         self.set_Rb(self.Rs*self.bps)
         self.set_samp_rate(self.Rs*self.Sps)
+        self.b_upconverter_cf_0.set_Fc(self.Rs*2)
         self.qtgui_time_sink_x_1.set_samp_rate(self.Rs)
         self.qtgui_time_sink_x_2.set_samp_rate(self.Rs)
 
@@ -1004,12 +1197,16 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.set_Fmax(self.samp_rate/2)
+        self.analog_sig_source_x_0.set_sampling_freq(self.samp_rate)
+        self.b_upconverter_cf_0.set_samp_rate(self.samp_rate)
         self.blocks_throttle_0.set_sample_rate(self.samp_rate)
         self.qtgui_eye_sink_x_0.set_samp_rate(self.samp_rate)
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.qtgui_freq_sink_x_0_0.set_frequency_range(0, self.samp_rate)
         self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
         self.qtgui_time_sink_x_0_0.set_samp_rate(self.samp_rate)
+        self.qtgui_time_sink_x_0_0_0.set_samp_rate(self.samp_rate)
+        self.qtgui_time_sink_x_3.set_samp_rate(self.samp_rate)
 
     def get_M(self):
         return self.M
@@ -1019,13 +1216,6 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.set_bps(int(math.log(self.M,2)))
         self.qtgui_time_sink_x_2.set_y_axis(-1, self.M)
 
-    def get_ntaps(self):
-        return self.ntaps
-
-    def set_ntaps(self, ntaps):
-        self.ntaps = ntaps
-        self.set_h(wform.rrcos(self.Sps,self.ntaps,self.beta))
-
     def get_bps(self):
         return self.bps
 
@@ -1033,13 +1223,6 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.bps = bps
         self.set_Rb(self.Rs*self.bps)
         self.blocks_delay_1_0_0_0.set_dly(self.retardo_propag*self.bps)
-
-    def get_beta(self):
-        return self.beta
-
-    def set_beta(self, beta):
-        self.beta = beta
-        self.set_h(wform.rrcos(self.Sps,self.ntaps,self.beta))
 
     def get_Fmax(self):
         return self.Fmax
@@ -1057,6 +1240,12 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.blocks_delay_1_0_0.set_dly(self.retardo_propag)
         self.blocks_delay_1_0_0_0.set_dly(self.retardo_propag*self.bps)
 
+    def get_ntaps(self):
+        return self.ntaps
+
+    def set_ntaps(self, ntaps):
+        self.ntaps = ntaps
+
     def get_h(self):
         return self.h
 
@@ -1064,6 +1253,26 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.h = h
         self.interp_fir_filter_xxx_0.set_taps(self.h)
         self.interp_fir_filter_xxx_0_0.set_taps(self.h)
+
+    def get_fading(self):
+        return self.fading
+
+    def set_fading(self, fading):
+        self.fading = fading
+        self.blocks_multiply_const_vxx_1_0.set_k(self.fading)
+
+    def get_ch_freq(self):
+        return self.ch_freq
+
+    def set_ch_freq(self, ch_freq):
+        self.ch_freq = ch_freq
+        self.analog_sig_source_x_0.set_frequency(self.ch_freq)
+
+    def get_beta(self):
+        return self.beta
+
+    def set_beta(self, beta):
+        self.beta = beta
 
     def get_Timing(self):
         return self.Timing
@@ -1086,12 +1295,31 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.Pn = Pn
         self.analog_noise_source_x_0.set_amplitude(math.sqrt(self.Pn))
 
+    def get_Gain_USRP_Tx_dB(self):
+        return self.Gain_USRP_Tx_dB
+
+    def set_Gain_USRP_Tx_dB(self, Gain_USRP_Tx_dB):
+        self.Gain_USRP_Tx_dB = Gain_USRP_Tx_dB
+
+    def get_Gain_USRP_Rx_dB(self):
+        return self.Gain_USRP_Rx_dB
+
+    def set_Gain_USRP_Rx_dB(self, Gain_USRP_Rx_dB):
+        self.Gain_USRP_Rx_dB = Gain_USRP_Rx_dB
+
     def get_Delay_eye(self):
         return self.Delay_eye
 
     def set_Delay_eye(self, Delay_eye):
         self.Delay_eye = Delay_eye
         self.blocks_delay_0.set_dly(self.Delay_eye)
+
+    def get_Ch_phase(self):
+        return self.Ch_phase
+
+    def set_Ch_phase(self, Ch_phase):
+        self.Ch_phase = Ch_phase
+        self.blocks_multiply_const_vxx_1.set_k(np.exp(1j*self.Ch_phase))
 
     def get_BW_filtro(self):
         return self.BW_filtro

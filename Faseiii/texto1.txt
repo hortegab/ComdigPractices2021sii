@@ -1,0 +1,24 @@
+Estamos en la Universidad Industrial de Santander. Realizando un paso gigante: por primera vez estamos usando un desarrollo propio, de un sistema de radiocomunicaciones hecho en la UIS para realizar pruebas de radiopropagación. 
+Soluciones 5G
+
+El Acceso Inalámbrico Fijo (Fixed Wireless Access – FWA) 5G será un factor que cambiará las reglas del juego en el mercado global de banda ancha y también se desempeñará como un catalizador para la era móvil 5G. De este modo, Samsung exhibe los últimos avances en soluciones 5G tanto para espectros mmWave como los de baja de 6GHz. La demostración en vivo del FWA 5G empleando mmWave mostrará un rendimiento máximo de datos con velocidades de 4Gbps.
+
+El análisis de video en vivo que involucra casos de uso del 5G, que muestra grandes volúmenes de información de video recogida en tiempo real, y un análisis exento de latencia de los videos en la nube de borde móvil (Mobile Edge Cloud), es uno de los proyectos trabajados por Samsung. Con grandes datos surgiendo como una sensación global, se puede utilizar el análisis de video en casos específicos como la prevención de crímenes, gestión de logística de centros comerciales y análisis de patrón de compras del cliente, entre otros usos.
+
+Virtualización de la Red
+
+Del  mismo modo, la compañía surcoreana demuestra su RAN (por su sigla en inglés, Red de Acceso por Radio) virtualizada, que evolucionará a una RAN unificada, integrando redes 4G y 5G, así como su operador de punta a punta automatizado. A través del network slicing en la nube, la adopción y la operación de los últimos servicios y aplicaciones se harán aún más fáciles con las funciones de la inteligencia artificial (IA) incorporadas, tales como herramientas de grandes datos y la plataforma para el IoT (Internet de las Cosas) de video.
+
+Soluciones de Capacidad de la Red
+
+Diseñadas para aumentar la experiencia del usuario a medida que el tráfico de datos móviles crece de forma exponencial, Samsung ha construido el ‘VoLTE Quality Monitoring & Analysis (VoMA)’ y el ‘CognitiV Data Traffic Monitoring & Analysis (DMA)’ para monitorear automáticamente y optimizar la calidad de los servicios de datos móviles para cada usuario de forma individual. De esta forma, se detectan situaciones anormales, como las congestiones de tráfico en una unidad celular. Con este avance cada usuario podrá disfrutar de una calidad de servicio superior. La analítica de grandes datos de Samsung lo hace posible gracias a su proceso automatizado.
+
+En ese sentido, el reto cumplido de Samsung es la demostración en vivo de las tecnologías LTE-Advance Pro en 3 tecnologías de agregación de operadores, 4×4 MIMO y 256QAN, así como 5 tecnologías de agregación de operadores usando un Smartphone para mostrar las velocidades alcanzadas de 1 Gbps.
+
+5G: lanzamiento comercial
+
+Con versiones pre-comerciales de estos productos y soluciones ya en despliegue de la mano de operadores en Estados Unidos, Corea del Sur y Japón, la cartera de productos 5G de Samsung representa la última etapa en el camino hacia la conversión de la industria al 5G.
+
+Con la experiencia adquirida durante las pruebas planeadas para 2017, los productos 5G de Samsung impulsarán la primera ola de despliegues comerciales de esta tecnología y ayudarán a asegurar una introducción exitosa de nuevos servicios en la industria móvil dentro de una nueva era de conectividad. En adelante, Samsung se enfoca en ampliar su portafolio 5G con soporte para la conectividad inferior a 6GHz 5G, así como la adopción de especificaciones 3GPP Release-15, y el portafolio de soluciones 5G, que está diseñado para ser actualizable a los estándares 3GPP a medida que se complementan a nivel mundial.
+
+Finalmente, Samsung también presenta oficialmente su línea de chipsets de módem 5G RFIC y ASIC que impulsarán la próxima generación de la infraestructura de red 5G, incluyendo los productos 5G Home Router y 5G de base de radio.
