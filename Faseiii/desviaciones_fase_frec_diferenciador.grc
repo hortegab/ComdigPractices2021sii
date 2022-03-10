@@ -1477,7 +1477,7 @@ blocks:
     comment: ''
     grid: 'False'
     gui_hint: menu@3:1,0,1,1
-    label1: t3
+    label1: r3
     label10: ''
     label2: ''
     label3: ''
@@ -1528,10 +1528,10 @@ blocks:
     width7: '1'
     width8: '1'
     width9: '1'
-    xmax: '0.5'
-    xmin: '-0.5'
-    ymax: '0.5'
-    ymin: '-0.5'
+    xmax: '1.5'
+    xmin: '-1.5'
+    ymax: '1.5'
+    ymin: '-1.5'
   states:
     bus_sink: false
     bus_source: false

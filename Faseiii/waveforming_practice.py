@@ -105,6 +105,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.Fmax = Fmax = samp_rate/2
         self.retardo_propag = retardo_propag = 1
         self.ntaps = ntaps = 16*Sps
+        self.jitter = jitter = 0
         self.h = h = [1]*Sps
         self.fading = fading = 1
         self.ch_freq = ch_freq = 0
@@ -112,6 +113,8 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.Timing = Timing = 1
         self.Rb = Rb = Rs*bps
         self.Pn = Pn = 0.05
+        self.MiconstellationObject = MiconstellationObject = digital.constellation_calcdist(constelacion, numpy.arange(M),
+        4, 1, digital.constellation.AMPLITUDE_NORMALIZATION).base()
         self.Gain_USRP_Tx_dB = Gain_USRP_Tx_dB = 30.
         self.Gain_USRP_Rx_dB = Gain_USRP_Rx_dB = 20
         self.Delay_eye = Delay_eye = 0
@@ -174,6 +177,13 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
             self.menu_grid_layout_4.setRowStretch(r, 1)
         for c in range(0, 1):
             self.menu_grid_layout_4.setColumnStretch(c, 1)
+        self._jitter_range = Range(0, Sps, 1, 0, 200)
+        self._jitter_win = RangeWidget(self._jitter_range, self.set_jitter, "jitter", "counter_slider", int, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._jitter_win, 5, 1, 1, 1)
+        for r in range(5, 6):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self._fading_range = Range(0, 1, 1/100, 1, 200)
         self._fading_win = RangeWidget(self._fading_range, self.set_fading, "fading", "counter_slider", float, QtCore.Qt.Horizontal)
         self.top_grid_layout.addWidget(self._fading_win, 2, 1, 1, 1)
@@ -500,7 +510,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_0_0.enable_stem_plot(False)
 
 
-        labels = ['r0 (Im)', 'r1 (Im)', 'Signal 3', 'Signal 4', 'Signal 5',
+        labels = ['p1 (Im)', 'r1 (Im)', 'Signal 3', 'Signal 4', 'Signal 5',
             'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
         widths = [3, 3, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -552,7 +562,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_0.enable_stem_plot(False)
 
 
-        labels = ['r0 (Re)', 'r1 (Re)', 'Signal 3', 'Signal 4', 'Signal 5',
+        labels = ['p1 (Re)', 'r1 (Re)', 'Signal 3', 'Signal 4', 'Signal 5',
             'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
         widths = [3, 3, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -688,7 +698,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
 
 
 
-        labels = ['r0', 'r1', '', '', '',
+        labels = ['p1', 'r1', '', '', '',
             '', '', '', '', '']
         widths = [3, 3, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -732,7 +742,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.qtgui_eye_sink_x_0.enable_control_panel(False)
 
 
-        labels = ['r0 (Re)', 'r0 (Im)', 'Signal 3', 'Signal 4', 'Signal 5',
+        labels = ['p1 (Re)', 'p1 (Im)', 'Signal 3', 'Signal 4', 'Signal 5',
             'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
         widths = [4, 4, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -916,7 +926,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.qtgui_const_sink_x_0_0.enable_axis_labels(True)
 
 
-        labels = ['r0 (Vista continua)', 'r1 (Vista continua)', '', '', '',
+        labels = ['p1 (Vista continua)', 'r1 (Vista continua)', '', '', '',
             '', '', '', '', '']
         widths = [3, 1, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -961,7 +971,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.qtgui_const_sink_x_0.enable_axis_labels(True)
 
 
-        labels = ['r0 (Vista discreta)', 'r1 (Vista discreta)', '', '', '',
+        labels = ['p1 (Vista discreta)', 'r1 (Vista discreta)', '', '', '',
             '', '', '', '', '']
         widths = [1, 1, 1, 1, 1,
             1, 1, 1, 1, 1]
@@ -997,6 +1007,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.interp_fir_filter_xxx_0.declare_sample_delay(0)
         self.fec_ber_bf_0 = fec.ber_bf(False, 100, -7.0)
         self.epy_block_0 = epy_block_0.inversedB()
+        self.digital_lms_dd_equalizer_cc_0 = digital.lms_dd_equalizer_cc(11, 0.01, 1, MiconstellationObject)
         self.digital_diff_encoder_bb_0 = digital.diff_encoder_bb(M, digital.DIFF_DIFFERENTIAL)
         self.digital_diff_decoder_bb_0 = digital.diff_decoder_bb(M, digital.DIFF_DIFFERENTIAL)
         self.digital_chunks_to_symbols_xx_0 = digital.chunks_to_symbols_bc(constelacion, 1)
@@ -1007,14 +1018,13 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.blocks_pack_k_bits_bb_0 = blocks.pack_k_bits_bb(8)
         self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_float*1)
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
-        self.blocks_multiply_const_vxx_1_0_0 = blocks.multiply_const_cc(0.7)
         self.blocks_multiply_const_vxx_1_0 = blocks.multiply_const_cc(fading)
         self.blocks_multiply_const_vxx_1 = blocks.multiply_const_cc(np.exp(1j*Ch_phase))
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(1/Sps)
         self.blocks_delay_1_0_0_0 = blocks.delay(gr.sizeof_char*1, retardo_propag*bps)
         self.blocks_delay_1_0_0 = blocks.delay(gr.sizeof_char*1, retardo_propag)
         self.blocks_delay_1_0 = blocks.delay(gr.sizeof_gr_complex*1, retardo_propag)
-        self.blocks_delay_1 = blocks.delay(gr.sizeof_gr_complex*1, 0)
+        self.blocks_delay_1 = blocks.delay(gr.sizeof_gr_complex*1, jitter)
         self.blocks_delay_0 = blocks.delay(gr.sizeof_gr_complex*1, Delay_eye)
         self.blocks_complex_to_float_0_0 = blocks.complex_to_float(1)
         self.blocks_complex_to_float_0 = blocks.complex_to_float(1)
@@ -1081,7 +1091,7 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.analog_agc3_xx_0, 0), (self.b_FLL_tunner2_0, 0))
+        self.connect((self.analog_agc3_xx_0, 0), (self.digital_lms_dd_equalizer_cc_0, 0))
         self.connect((self.analog_noise_source_x_0, 0), (self.blocks_add_xx_0, 0))
         self.connect((self.analog_random_source_x_0, 0), (self.blocks_delay_1_0_0_0, 0))
         self.connect((self.analog_random_source_x_0, 0), (self.blocks_pack_k_bits_bb_0, 0))
@@ -1095,8 +1105,8 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.connect((self.b_diez_cc_0, 0), (self.analog_agc3_xx_0, 0))
         self.connect((self.b_diezmador_ff_0, 0), (self.qtgui_time_sink_x_3, 0))
         self.connect((self.b_meter_power_cc_0, 1), (self.b_diezmador_ff_0, 0))
-        self.connect((self.b_meter_power_cc_0, 2), (self.blocks_null_sink_0, 1))
         self.connect((self.b_meter_power_cc_0, 0), (self.blocks_null_sink_0, 0))
+        self.connect((self.b_meter_power_cc_0, 2), (self.blocks_null_sink_0, 1))
         self.connect((self.b_upconverter_cf_0, 0), (self.qtgui_time_sink_x_0_0_0, 0))
         self.connect((self.blocks_add_xx_0, 0), (self.blocks_delay_1, 0))
         self.connect((self.blocks_char_to_float_0, 0), (self.qtgui_time_sink_x_2, 0))
@@ -1107,8 +1117,8 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_complex_to_float_0, 1), (self.qtgui_time_sink_x_0_0, 0))
         self.connect((self.blocks_complex_to_float_0_0, 0), (self.qtgui_time_sink_x_0, 1))
         self.connect((self.blocks_complex_to_float_0_0, 1), (self.qtgui_time_sink_x_0_0, 1))
-        self.connect((self.blocks_delay_0, 1), (self.qtgui_eye_sink_x_0, 1))
         self.connect((self.blocks_delay_0, 0), (self.qtgui_eye_sink_x_0, 0))
+        self.connect((self.blocks_delay_0, 1), (self.qtgui_eye_sink_x_0, 1))
         self.connect((self.blocks_delay_1, 0), (self.b_meter_power_cc_0, 0))
         self.connect((self.blocks_delay_1, 0), (self.b_upconverter_cf_0, 0))
         self.connect((self.blocks_delay_1, 0), (self.blocks_complex_to_float_0, 0))
@@ -1129,7 +1139,6 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.qtgui_freq_sink_x_0, 1))
         self.connect((self.blocks_multiply_const_vxx_1, 0), (self.blocks_add_xx_0, 1))
         self.connect((self.blocks_multiply_const_vxx_1_0, 0), (self.blocks_multiply_xx_0, 0))
-        self.connect((self.blocks_multiply_const_vxx_1_0_0, 0), (self.interp_fir_filter_xxx_0, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.blocks_multiply_const_vxx_1, 0))
         self.connect((self.blocks_pack_k_bits_bb_0, 0), (self.blocks_packed_to_unpacked_xx_0, 0))
         self.connect((self.blocks_packed_to_unpacked_xx_0, 0), (self.blocks_delay_1_0_0, 0))
@@ -1139,11 +1148,12 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_unpack_k_bits_bb_0, 0), (self.fec_ber_bf_0, 1))
         self.connect((self.blocks_unpacked_to_packed_xx_0, 0), (self.blocks_unpack_k_bits_bb_0, 0))
         self.connect((self.digital_chunks_to_symbols_xx_0, 0), (self.blocks_delay_1_0, 0))
-        self.connect((self.digital_chunks_to_symbols_xx_0, 0), (self.blocks_multiply_const_vxx_1_0_0, 0))
+        self.connect((self.digital_chunks_to_symbols_xx_0, 0), (self.interp_fir_filter_xxx_0, 0))
         self.connect((self.digital_chunks_to_symbols_xx_0, 0), (self.qtgui_const_sink_x_0_1_0, 0))
         self.connect((self.digital_diff_decoder_bb_0, 0), (self.blocks_char_to_float_0_0, 0))
         self.connect((self.digital_diff_decoder_bb_0, 0), (self.blocks_unpacked_to_packed_xx_0, 0))
         self.connect((self.digital_diff_encoder_bb_0, 0), (self.digital_chunks_to_symbols_xx_0, 0))
+        self.connect((self.digital_lms_dd_equalizer_cc_0, 0), (self.b_FLL_tunner2_0, 0))
         self.connect((self.epy_block_0, 0), (self.qtgui_number_sink_0, 0))
         self.connect((self.fec_ber_bf_0, 0), (self.epy_block_0, 0))
         self.connect((self.interp_fir_filter_xxx_0, 0), (self.blocks_throttle_0, 0))
@@ -1246,6 +1256,13 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
     def set_ntaps(self, ntaps):
         self.ntaps = ntaps
 
+    def get_jitter(self):
+        return self.jitter
+
+    def set_jitter(self, jitter):
+        self.jitter = jitter
+        self.blocks_delay_1.set_dly(self.jitter)
+
     def get_h(self):
         return self.h
 
@@ -1294,6 +1311,12 @@ class waveforming_practice(gr.top_block, Qt.QWidget):
     def set_Pn(self, Pn):
         self.Pn = Pn
         self.analog_noise_source_x_0.set_amplitude(math.sqrt(self.Pn))
+
+    def get_MiconstellationObject(self):
+        return self.MiconstellationObject
+
+    def set_MiconstellationObject(self, MiconstellationObject):
+        self.MiconstellationObject = MiconstellationObject
 
     def get_Gain_USRP_Tx_dB(self):
         return self.Gain_USRP_Tx_dB

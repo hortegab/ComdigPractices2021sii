@@ -350,38 +350,14 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '[1]*Sps'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [2528, 84.0]
-    rotation: 0
-    state: enabled
-- name: h
-  id: variable
-  parameters:
-    comment: ''
-    value: wform.rcos(Sps,ntaps,beta)
+    value: wform.rrcos(Sps,ntaps,beta)
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
     coordinate: [2520, 12.0]
     rotation: 0
-    state: disabled
-- name: h
-  id: variable
-  parameters:
-    comment: ''
-    value: wform.rrcos(Sps,ntaps,beta)
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [2632, 28.0]
-    rotation: 0
-    state: disabled
+    state: enabled
 - name: jitter
   id: variable_qtgui_range
   parameters:
@@ -467,7 +443,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1248, 588.0]
+    coordinate: [1216, 588.0]
     rotation: 180
     state: true
 - name: analog_noise_source_x_0
@@ -561,23 +537,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [672, 628.0]
-    rotation: 180
-    state: true
-- name: b_diez_cc_0
-  id: b_diez_cc
-  parameters:
-    M: Timing
-    N: Sps
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1408, 620.0]
     rotation: 180
     state: true
 - name: b_diezmador_ff_0
@@ -842,24 +801,6 @@ blocks:
     coordinate: [976, 1424.0]
     rotation: 0
     state: true
-- name: blocks_multiply_const_vxx_0
-  id: blocks_multiply_const_vxx
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    const: 1/Sps
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    type: complex
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1520, 628.0]
-    rotation: 180
-    state: true
 - name: blocks_multiply_const_vxx_1
   id: blocks_multiply_const_vxx
   parameters:
@@ -1110,7 +1051,30 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1064, 604.0]
+    coordinate: [1192, 452.0]
+    rotation: 180
+    state: disabled
+- name: digital_pfb_clock_sync_xxx_0
+  id: digital_pfb_clock_sync_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    filter_size: '32'
+    init_phase: 32/2
+    loop_bw: 2*math.pi/100.0
+    max_dev: '1.5'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    osps: '1'
+    sps: Sps
+    taps: h
+    type: ccf
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1568, 628.0]
     rotation: 180
     state: enabled
 - name: epy_block_0
@@ -1211,25 +1175,6 @@ blocks:
     bus_structure: null
     coordinate: [1312, 156.0]
     rotation: 0
-    state: true
-- name: interp_fir_filter_xxx_0_0
-  id: interp_fir_filter_xxx
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    interp: '1'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    samp_delay: '0'
-    taps: h
-    type: ccf
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1648, 620.0]
-    rotation: 180
     state: true
 - name: menu
   id: qtgui_tab_widget
@@ -1939,9 +1884,9 @@ blocks:
     grid: 'False'
     gui_hint: menu@1:1,0,1,1
     label: Relative Gain
-    label1: t3
+    label1: r3
     label10: ''''''
-    label2: ''''''
+    label2: r3a
     label3: ''''''
     label4: ''''''
     label5: ''''''
@@ -1953,7 +1898,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     name: '""'
-    nconnections: '1'
+    nconnections: '2'
     norm_window: 'False'
     showports: 'False'
     tr_chan: '0'
@@ -2735,7 +2680,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1956.0, 488]
+    coordinate: [2036.0, 504]
     rotation: 90
     state: true
 - name: virtual_sink_0_0
@@ -2761,7 +2706,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [908.0, 248]
+    coordinate: [860.0, 248]
     rotation: 270
     state: true
 - name: virtual_sink_0_0_0_0
@@ -2803,6 +2748,19 @@ blocks:
     coordinate: [124.0, 488]
     rotation: 90
     state: true
+- name: virtual_sink_0_0_0_0_1
+  id: virtual_sink
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: r3a
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1452.0, 480]
+    rotation: 90
+    state: true
 - name: virtual_sink_0_0_0_1
   id: virtual_sink
   parameters:
@@ -2839,7 +2797,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1500.0, 496]
+    coordinate: [1796.0, 504]
     rotation: 90
     state: true
 - name: virtual_source_0
@@ -2931,6 +2889,19 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [784, 1420.0]
+    rotation: 0
+    state: true
+- name: virtual_source_0_0_1
+  id: virtual_source
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: r3a
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [808, 1212.0]
     rotation: 0
     state: true
 - name: virtual_source_0_1
@@ -3025,7 +2996,7 @@ blocks:
     state: enabled
 
 connections:
-- [analog_agc3_xx_0, '0', digital_lms_dd_equalizer_cc_0, '0']
+- [analog_agc3_xx_0, '0', b_FLL_tunner2_0, '0']
 - [analog_noise_source_x_0, '0', blocks_add_xx_0, '0']
 - [analog_noise_source_x_0, '0', virtual_sink_0_0, '0']
 - [analog_random_source_x_0, '0', blocks_pack_k_bits_bb_0, '0']
@@ -3034,7 +3005,6 @@ connections:
 - [b_FLL_tunner2_0, '0', b_demod_constelacion_cb_0, '0']
 - [b_FLL_tunner2_0, '0', virtual_sink_0_0_0_0, '0']
 - [b_demod_constelacion_cb_0, '0', digital_diff_decoder_bb_0, '0']
-- [b_diez_cc_0, '0', analog_agc3_xx_0, '0']
 - [b_diezmador_ff_0, '0', qtgui_time_sink_x_3, '0']
 - [b_meter_power_cc_0, '0', blocks_null_sink_0, '0']
 - [b_meter_power_cc_0, '1', b_diezmador_ff_0, '0']
@@ -3051,14 +3021,13 @@ connections:
 - [blocks_complex_to_float_0_0, '1', qtgui_time_sink_x_0_0, '1']
 - [blocks_delay_0, '0', qtgui_eye_sink_x_0, '0']
 - [blocks_delay_0, '1', qtgui_eye_sink_x_0, '1']
-- [blocks_delay_1, '0', interp_fir_filter_xxx_0_0, '0']
+- [blocks_delay_1, '0', digital_pfb_clock_sync_xxx_0, '0']
 - [blocks_delay_1, '0', virtual_sink_0, '0']
+- [blocks_delay_1, '0', virtual_sink_0_1, '0']
 - [blocks_delay_1_0, '0', qtgui_time_sink_x_1, '0']
 - [blocks_delay_1_0_0, '0', blocks_char_to_float_0, '0']
 - [blocks_delay_1_0_0_0, '0', blocks_char_to_float_0_1, '0']
 - [blocks_delay_1_0_0_0, '0', fec_ber_bf_0, '0']
-- [blocks_multiply_const_vxx_0, '0', b_diez_cc_0, '0']
-- [blocks_multiply_const_vxx_0, '0', virtual_sink_0_1, '0']
 - [blocks_multiply_const_vxx_1, '0', blocks_add_xx_0, '1']
 - [blocks_multiply_const_vxx_1_0, '0', blocks_multiply_xx_0, '0']
 - [blocks_multiply_xx_0, '0', blocks_multiply_const_vxx_1, '0']
@@ -3076,10 +3045,12 @@ connections:
 - [digital_diff_decoder_bb_0, '0', virtual_sink_0_0_0_0_0, '0']
 - [digital_diff_encoder_bb_0, '0', digital_chunks_to_symbols_xx_0, '0']
 - [digital_lms_dd_equalizer_cc_0, '0', b_FLL_tunner2_0, '0']
+- [digital_pfb_clock_sync_xxx_0, '0', analog_agc3_xx_0, '0']
+- [digital_pfb_clock_sync_xxx_0, '0', digital_lms_dd_equalizer_cc_0, '0']
+- [digital_pfb_clock_sync_xxx_0, '0', virtual_sink_0_0_0_0_1, '0']
 - [epy_block_0, '0', qtgui_number_sink_0, '0']
 - [fec_ber_bf_0, '0', epy_block_0, '0']
 - [interp_fir_filter_xxx_0, '0', blocks_throttle_0, '0']
-- [interp_fir_filter_xxx_0_0, '0', blocks_multiply_const_vxx_0, '0']
 - [virtual_source_0, '0', b_meter_power_cc_0, '0']
 - [virtual_source_0, '0', b_upconverter_cf_0, '0']
 - [virtual_source_0, '0', blocks_complex_to_float_0, '0']
@@ -3095,6 +3066,7 @@ connections:
 - [virtual_source_0_0_0_0_0_0, '0', blocks_char_to_float_0_0_0, '0']
 - [virtual_source_0_0_0_0_0_0, '0', fec_ber_bf_0, '1']
 - [virtual_source_0_0_0_0_1, '0', blocks_delay_1_0_0_0, '0']
+- [virtual_source_0_0_1, '0', qtgui_freq_sink_x_0_0, '1']
 - [virtual_source_0_1, '0', blocks_complex_to_float_0_0, '0']
 - [virtual_source_0_1, '0', blocks_delay_0, '1']
 - [virtual_source_0_1, '0', qtgui_const_sink_x_0, '1']
