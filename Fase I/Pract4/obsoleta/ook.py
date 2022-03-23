@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: GPL-3.0
 #
 # GNU Radio Python Flow Graph
-# Title: fsk
+# Title: ook
 # Author: radiogis_director
 # GNU Radio version: 3.9.5.0
 
@@ -38,21 +38,21 @@ from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 from gnuradio.qtgui import Range, RangeWidget
 from PyQt5 import QtCore
-import fsk_epy_block_0 as epy_block_0  # embedded python block
-import fsk_epy_block_0_0 as epy_block_0_0  # embedded python block
 import math
 import numpy as np
+import ook_epy_block_0 as epy_block_0  # embedded python block
+import ook_epy_block_0_0 as epy_block_0_0  # embedded python block
 
 
 
 from gnuradio import qtgui
 
-class fsk(gr.top_block, Qt.QWidget):
+class ook(gr.top_block, Qt.QWidget):
 
     def __init__(self):
-        gr.top_block.__init__(self, "fsk", catch_exceptions=True)
+        gr.top_block.__init__(self, "ook", catch_exceptions=True)
         Qt.QWidget.__init__(self)
-        self.setWindowTitle("fsk")
+        self.setWindowTitle("ook")
         qtgui.util.check_set_qss()
         try:
             self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
@@ -70,7 +70,7 @@ class fsk(gr.top_block, Qt.QWidget):
         self.top_grid_layout = Qt.QGridLayout()
         self.top_layout.addLayout(self.top_grid_layout)
 
-        self.settings = Qt.QSettings("GNU Radio", "fsk")
+        self.settings = Qt.QSettings("GNU Radio", "ook")
 
         try:
             if StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
@@ -110,17 +110,17 @@ class fsk(gr.top_block, Qt.QWidget):
         self.Menu_layout_1 = Qt.QBoxLayout(Qt.QBoxLayout.TopToBottom, self.Menu_widget_1)
         self.Menu_grid_layout_1 = Qt.QGridLayout()
         self.Menu_layout_1.addLayout(self.Menu_grid_layout_1)
-        self.Menu.addTab(self.Menu_widget_1, 'Modulated-Time')
+        self.Menu.addTab(self.Menu_widget_1, 'RF Modulated. Time Domain')
         self.Menu_widget_2 = Qt.QWidget()
         self.Menu_layout_2 = Qt.QBoxLayout(Qt.QBoxLayout.TopToBottom, self.Menu_widget_2)
         self.Menu_grid_layout_2 = Qt.QGridLayout()
         self.Menu_layout_2.addLayout(self.Menu_grid_layout_2)
-        self.Menu.addTab(self.Menu_widget_2, 'Modulated-Freq')
+        self.Menu.addTab(self.Menu_widget_2, 'RF Modulated. Freq Domain')
         self.Menu_widget_3 = Qt.QWidget()
         self.Menu_layout_3 = Qt.QBoxLayout(Qt.QBoxLayout.TopToBottom, self.Menu_widget_3)
         self.Menu_grid_layout_3 = Qt.QGridLayout()
         self.Menu_layout_3.addLayout(self.Menu_grid_layout_3)
-        self.Menu.addTab(self.Menu_widget_3, 'Constellatin')
+        self.Menu.addTab(self.Menu_widget_3, 'Constellation')
         self.top_grid_layout.addWidget(self.Menu, 4, 0, 1, 2)
         for r in range(4, 5):
             self.top_grid_layout.setRowStretch(r, 1)
@@ -511,7 +511,7 @@ class fsk(gr.top_block, Qt.QWidget):
 
 
     def closeEvent(self, event):
-        self.settings = Qt.QSettings("GNU Radio", "fsk")
+        self.settings = Qt.QSettings("GNU Radio", "ook")
         self.settings.setValue("geometry", self.saveGeometry())
         self.stop()
         self.wait()
@@ -571,7 +571,7 @@ class fsk(gr.top_block, Qt.QWidget):
 
 
 
-def main(top_block_cls=fsk, options=None):
+def main(top_block_cls=ook, options=None):
 
     if StrictVersion("4.5.0") <= StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
         style = gr.prefs().get_string('qtgui', 'style', 'raster')

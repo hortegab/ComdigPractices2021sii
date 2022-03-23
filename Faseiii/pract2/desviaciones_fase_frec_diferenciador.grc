@@ -298,7 +298,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: digital.constellation_qpsk().points()
+    value: digital.constellation_16qam().points()
   states:
     bus_sink: false
     bus_source: false
