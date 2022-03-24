@@ -11,7 +11,7 @@ options:
     gen_linking: dynamic
     generate_options: qt_gui
     hier_block_src_path: '.:'
-    id: ber_ser
+    id: top_block
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -22,7 +22,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: ber_ser
+    title: top_block
     window_size: (1000,1000)
   states:
     bus_sink: false
@@ -363,38 +363,6 @@ blocks:
     coordinate: [768, 4.0]
     rotation: 0
     state: enabled
-- name: E3TRadio_Zero_Order_Hold_0
-  id: E3TRadio_Zero_Order_Hold
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    k: bps
-    maxoutbuf: '0'
-    minoutbuf: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [264, 1332.0]
-    rotation: 0
-    state: disabled
-- name: E3TRadio_e_BERtool_0_0
-  id: E3TRadio_e_BERtool
-  parameters:
-    N: N_snr*bps
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [464, 1336.0]
-    rotation: 0
-    state: disabled
 - name: analog_random_source_x_0
   id: analog_random_source_x
   parameters:
@@ -430,34 +398,6 @@ blocks:
     bus_structure: null
     coordinate: [544, 484.0]
     rotation: 180
-    state: true
-- name: b_diezmador_ff_0
-  id: b_diezmador_ff
-  parameters:
-    Paso: bps
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [560, 1364.0]
-    rotation: 0
-    state: disabled
-- name: b_help_0
-  id: b_help
-  parameters:
-    alias: ''
-    comment: ''
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1152, 168.0]
-    rotation: 0
     state: true
 - name: blocks_char_to_float_0
   id: blocks_char_to_float
@@ -600,58 +540,6 @@ blocks:
     coordinate: [1168, 1192.0]
     rotation: 0
     state: enabled
-- name: blocks_float_to_int_0
-  id: blocks_float_to_int
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    scale: '1'
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [352, 1332.0]
-    rotation: 0
-    state: disabled
-- name: blocks_int_to_float_0
-  id: blocks_int_to_float
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    scale: '1'
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [160, 1332.0]
-    rotation: 0
-    state: disabled
-- name: blocks_nlog10_ff_0_0
-  id: blocks_nlog10_ff
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    k: '0'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    n: '1'
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [688, 1364.0]
-    rotation: 0
-    state: disabled
 - name: blocks_nlog10_ff_0_1
   id: blocks_nlog10_ff
   parameters:
@@ -722,24 +610,6 @@ blocks:
     coordinate: [312, 148.0]
     rotation: 0
     state: true
-- name: blocks_stream_to_vector_0_0
-  id: blocks_stream_to_vector
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    num_items: N_snr
-    type: float
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [768, 1368.0]
-    rotation: 0
-    state: disabled
 - name: blocks_unpack_k_bits_bb_0
   id: blocks_unpack_k_bits_bb
   parameters:
@@ -2243,7 +2113,7 @@ blocks:
     label9: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: '"Curvas de SER y BER"'
+    name: '"Curvas de SER"'
     nconnections: '1'
     ref_level: '0'
     showports: 'True'
@@ -2469,19 +2339,6 @@ blocks:
     coordinate: [40, 1164.0]
     rotation: 0
     state: enabled
-- name: virtual_source_0_0_0_0_0_1_0
-  id: virtual_source
-  parameters:
-    alias: ''
-    comment: ''
-    stream_id: p3
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [40, 1332.0]
-    rotation: 0
-    state: disabled
 - name: virtual_source_0_0_0_0_1
   id: virtual_source
   parameters:
@@ -2508,19 +2365,6 @@ blocks:
     coordinate: [40, 1260.0]
     rotation: 0
     state: enabled
-- name: virtual_source_0_0_0_0_3_0
-  id: virtual_source
-  parameters:
-    alias: ''
-    comment: ''
-    stream_id: r5
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [40, 1428.0]
-    rotation: 0
-    state: disabled
 - name: virtual_source_0_1_0
   id: virtual_source
   parameters:
@@ -2560,19 +2404,6 @@ blocks:
     coordinate: [40, 1212.0]
     rotation: 0
     state: enabled
-- name: virtual_source_0_1_0_3_0
-  id: virtual_source
-  parameters:
-    alias: ''
-    comment: ''
-    stream_id: t5
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [40, 1380.0]
-    rotation: 0
-    state: disabled
 - name: vs0_1_0
   id: virtual_sink
   parameters:
@@ -2639,13 +2470,10 @@ blocks:
     state: disabled
 
 connections:
-- [E3TRadio_Zero_Order_Hold_0, '0', blocks_float_to_int_0, '0']
-- [E3TRadio_e_BERtool_0_0, '0', b_diezmador_ff_0, '0']
 - [analog_random_source_x_0, '0', blocks_pack_k_bits_bb_0, '0']
 - [analog_random_source_x_0, '0', virtual_sink_0_0_0_1_0, '0']
 - [b_demod_constelacion_cb_0, '0', blocks_unpacked_to_packed_xx_0, '0']
 - [b_demod_constelacion_cb_0, '0', virtual_sink_0_0_0_0_0, '0']
-- [b_diezmador_ff_0, '0', blocks_nlog10_ff_0_0, '0']
 - [blocks_char_to_float_0, '0', qtgui_time_sink_x_2, '0']
 - [blocks_char_to_float_0_0, '0', qtgui_time_sink_x_2, '1']
 - [blocks_char_to_float_0_0_0, '0', qtgui_time_sink_x_2_0, '1']
@@ -2656,9 +2484,6 @@ connections:
 - [blocks_delay_1_0_0, '0', blocks_char_to_float_0, '0']
 - [blocks_delay_1_0_0_0, '0', blocks_char_to_float_0_1, '0']
 - [blocks_delay_1_0_0_0, '0', fec_ber_bf_0, '0']
-- [blocks_float_to_int_0, '0', E3TRadio_e_BERtool_0_0, '0']
-- [blocks_int_to_float_0, '0', E3TRadio_Zero_Order_Hold_0, '0']
-- [blocks_nlog10_ff_0_0, '0', blocks_stream_to_vector_0_0, '0']
 - [blocks_nlog10_ff_0_1, '0', qtgui_vector_sink_f_0_0, '0']
 - [blocks_pack_k_bits_bb_0, '0', blocks_packed_to_unpacked_xx_0, '0']
 - [blocks_pack_k_bits_bb_0, '0', virtual_sink_0_0_0_1_1, '0']
@@ -2687,15 +2512,12 @@ connections:
 - [virtual_source_0_0_0_0_0_0, '0', blocks_char_to_float_0_0_0, '0']
 - [virtual_source_0_0_0_0_0_0, '0', fec_ber_bf_0, '1']
 - [virtual_source_0_0_0_0_0_1, '0', epy_block_2, '0']
-- [virtual_source_0_0_0_0_0_1_0, '0', blocks_int_to_float_0, '0']
 - [virtual_source_0_0_0_0_1, '0', blocks_delay_1_0_0_0, '0']
 - [virtual_source_0_0_0_0_3, '0', epy_block_2, '2']
-- [virtual_source_0_0_0_0_3_0, '0', E3TRadio_e_BERtool_0_0, '2']
 - [virtual_source_0_1_0, '0', blocks_delay_1_0, '0']
 - [virtual_source_0_1_0_0, '0', qtgui_const_sink_x_1, '0']
 - [virtual_source_0_1_0_0, '0', qtgui_time_sink_x_1, '1']
 - [virtual_source_0_1_0_3, '0', epy_block_2, '1']
-- [virtual_source_0_1_0_3_0, '0', E3TRadio_e_BERtool_0_0, '1']
 
 metadata:
   file_format: 1

@@ -1,0 +1,746 @@
+options:
+  parameters:
+    author: Homero Ortega Boada
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: "Lo m\xE1ximo para practicar el tema de Filtro Coseno Alzado"
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: top_block
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: top_block
+    window_size: (1000,1000)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 4.0]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: EsN0max
+  id: variable
+  parameters:
+    comment: ''
+    value: '25.'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1216, 148.0]
+    rotation: 0
+    state: enabled
+- name: EsN0min
+  id: variable
+  parameters:
+    comment: ''
+    value: '-5.'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1216, 84.0]
+    rotation: 0
+    state: enabled
+- name: M0
+  id: variable
+  parameters:
+    comment: ''
+    value: len(constelacion0 )
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [456, 4.0]
+    rotation: 0
+    state: enabled
+- name: N_snr
+  id: variable
+  parameters:
+    comment: ''
+    value: '16'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1224, 20.0]
+    rotation: 0
+    state: enabled
+- name: Rs
+  id: variable
+  parameters:
+    comment: ''
+    value: '32000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [184, 4.0]
+    rotation: 0
+    state: enabled
+- name: constelacion0
+  id: variable
+  parameters:
+    comment: ''
+    value: digital.constellation_bpsk().points()
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [272, 4.0]
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: Rs
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [624, 4.0]
+    rotation: 0
+    state: enabled
+- name: analog_random_source_x_0
+  id: analog_random_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    max: M0
+    maxoutbuf: '0'
+    min: '0'
+    minoutbuf: '0'
+    num_samps: '1000'
+    repeat: 'True'
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 132.0]
+    rotation: 0
+    state: true
+- name: b_demod_constelacion_cb_0
+  id: b_demod_constelacion_cb
+  parameters:
+    Constelacion: constelacion0
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [280, 364.0]
+    rotation: 180
+    state: true
+- name: blocks_nlog10_ff_0_1
+  id: blocks_nlog10_ff
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    k: '0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n: '1'
+    vlen: N_snr
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [632, 1188.0]
+    rotation: 0
+    state: enabled
+- name: blocks_null_sink_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 368.0]
+    rotation: 180
+    state: true
+- name: digital_chunks_to_symbols_xx_0
+  id: digital_chunks_to_symbols_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    dimension: '1'
+    in_type: byte
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    out_type: complex
+    symbol_table: constelacion0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [328, 160.0]
+    rotation: 0
+    state: true
+- name: epy_block_1
+  id: epy_block
+  parameters:
+    B: Rs
+    EsN0max: EsN0max
+    EsN0min: EsN0min
+    N: N_snr
+    Rs: Rs
+    _source_code: "import numpy\nimport numpy as np\nimport random\nimport math\n\
+      from gnuradio import gr\n\nclass e_canal_BER(gr.sync_block):\n    \"\"\"\nEs\
+      \ un canal AWGN (Additive White Gaussian Noise, en banda base), Recibe la envolvente\
+      \ compleja de una senal con modulacion digital. \nEl bloque tiene dos salidas:\
+      \ out0, out1. En out0 entrega la misma senal recibida pero con ruido blanco\
+      \ gausiano aditivo con \ndiferentes valores de potencia que corresponden a diferentes\
+      \ valores Es/No; en out1 entrega un valor de Es/No aplicado a cada muestra de\
+      \ out0. \nEste bloque se diferencia de otros bloques tradicionales de canal\
+      \ AWGN en lo siguiente: \n- Tiene internamente una funcion que mide la potencia\
+      \ promedio de la senal entrante Ps, de modo que puede calcular Es=Ps/Rs; \n\
+      - Al ir variando la potencia del ruido Pn se logra variar la relacion Es/No\
+      \ para que tome N posibles valores entre EsN0min y EsN0max. \n- Con eso ha completado\
+      \ el primer ensayo para que otro sea el bloque que calcule la Curva de BER.\
+      \ \n- Pero alli no para, sino que sigue realizando tantos ensayos como lo permita\
+      \ el tiempo de simulacion, para que el bloque que calcula la Curva de BER la\
+      \ pueda ir perfeccionando cada vez mas.\n\nDatos de configuracion del bloque:\n\
+      N: Es el numero de puntos discretos que va a tener la curva de BER. Tambien\
+      \ corresponde al numero de valores que tomar\xE1 la relacion Es/No\nEsN0min:\
+      \ El minimo valor a tener en cuenta para Es/No\nEsN0max: El maximo valor a tener\
+      \ en cuenta para Es/No\nRs: es la rata de simbolos.\nB: Es una caracteristica\
+      \ de la senal entrante, corresponde a la frecuencia de muestreo de la se\xF1\
+      al entrante y puede ser mayor o igual a Rs. \nEs: es la energia de un simbolo\n\
+      \nSenales de entrada:\nIn0: Envolvente compleja de se\xF1al con modulacion digital.\n\
+      \nSenales de salida: \nout0: es la salida del canal, es decir, la misma se\xF1\
+      al entrante pero a la cual se le ha sumado un ruido para satisfacer una determinado\
+      \ valor para la relaci\xF3n Es/No\nout1: Es el valor Es/No aplicado a la salida\
+      \ actual.\n\nAlgunas variables internas son:\nNo: es la Densidad espectral del\
+      \ potencia del ruido blanco.\nSNR-Db: es la relacion senal a ruido en dB\n\n\
+      NOTA IMPORTANTE: \n* Nos preguntamos si este bloque no deberia llamarse e_canal_BER,\
+      \ pues no maneja bits, ni relacion alguna con ellos, solo simbolos. El nombre\
+      \ mas apropiado seria e_canal_EsN0\n* Este bloque no conoce el numero de bits\
+      \ por simbolo, por lo tanto no puede determinar la relacion Eb/No y lo que calcula\
+      \ es la BER con respecto a Es/No.\n* La Envolvente compleja puede tener varias\
+      \ muestras por simbolo (Sps), por ejemplo cuando ha pasado por un bloque de\
+      \ Wave Forming, por ello SampRate puede ser mayor o igual a Rs. SampRate=Rs*Sps.\
+      \ El problema es que en este caso, la salida out0 tendra tambien Sps valores\
+      \ por simbolo, lo cual debe ser tenido en cuenta por los bloques que usen esta\
+      \ senal.\n* Es es calculado como: Es = Ps x Ts, donde Ps es la potencia promedio\
+      \ de la senal entrante (se mide internamente) y Ts es la duracion de cada simbolo\
+      \ o Ts = 1 / Rs. Entendemos que eso implica imaginar que los simbolos tienen\
+      \ forma rectangular, lo cual puede ser valido cuando la senal entrante trae\
+      \ modulacion digital basada en puntos de constelacion como es el caso de: BPSK,\
+      \ QPSK, MPSK, MQAM. En otras palabras, es una idealizacion pensada en una herramienta\
+      \ de analisis de Curvas de BER para comparar diferentes tipos de modulacion\
+      \ en condiciones similares.\n\nPARA CORREGIR: este bloque no debria llamarse\
+      \ e_canal_BER sino canal_BER_cc\n\"\"\"\n    def __init__(self, N=8, EsN0min=0,\
+      \ EsN0max=16,B=100,Rs=1):  # only default arguments here\n        gr.sync_block.__init__(\n\
+      \        self,\n        name='e_EsNo_Channel',\n        in_sig=[np.complex64],\n\
+      \        out_sig=[np.complex64, np.int32])\n\n        # Npoints: Numero de puntos\
+      \ de la curva de SER\n        # Ntrials: es un vector que contiene el numero\
+      \ de ensayos a aplicar\n        # a cada punto de la curva SER. Pero los ensayos\
+      \ no est\xE1n dados en\n        # n\xFAmero de muestras sino en n\xFAmero de\
+      \ tramas de L muestras\n        # itrial: es el ensayo actual\n        # self.ipoint:\
+      \ el punto actual de la curva\n        # Calc_v: velocidad de calculo. Entre\
+      \ mas pequeno la curva de BER se vera cambiando de manera mas dinamica\n   \
+      \     # pero tendremos mayor desgaste de tiempo para obtener la curva final.\n\
+      \        Calc_v=1.5\n        self.Npoints = N\n        self.B=B\n        self.Rs=Rs\n\
+      \        self.EsN0dB=np.linspace(EsN0min,EsN0max,N)\n        self.Ntrials=np.round(np.power(Calc_v,np.arange(N)))\n\
+      \        #self.Ntrials=np.arange(N)*10\n#        self.Ntrials=[2]*N\n      \
+      \  self.ipoint=0\n        self.itrial=0\n     \n    def work(self, input_items,\
+      \ output_items):\n\n        # calculo de la varianza (potencia promedio normalizada)\
+      \ de la senal entrante\n        L=len(input_items[0])\n        Pin=np.mean(np.absolute(input_items[0])**2)\n\
+      \n        ###############################################################  \n\
+      \        ##  Aqui es donde esta el mehoyo y se puede optimizar mejor  ##\n \
+      \       ##  Algo que se podria hacer es que le de mas atencion a los ## \n \
+      \       ##  valores altos de Es/No que es donde es mas dificil de ob-##\n  \
+      \      ##  tener la BER. Al parecer la forma facil de hacerlo es    ##\n   \
+      \     ##  hacer que el vector EsN0dB vaya cambiando, ya que es     ##\n    \
+      \    ##  estatico y es el que define que valores de EsN0dB usar   ##\n     \
+      \   ## Nota: a veces se nos da por creer que debemos entregar un \n        ##\
+      \ vector o stream que lleva N muestras consecutivas, pero   ##\n        ## no\
+      \ es as\xED, sino que cada muestra que sale lleva una espe- ##\n        ## de\
+      \ etiqueta que dice cual es su puesto dentro de los N    ##\n        ## valores\
+      \ discretos de la curva de BER, esa etiqueta es la  ##\n        ## sale por\
+      \ la salida out1, porque a cada muestra en out0,   ##\n        ## le corresponde\
+      \ una en out1.                               ##\n        ## Quiz\xE1 necesitamos\
+      \ incluir un retardador para que si los   ##\n        ## bits han sufrido un\
+      \ retardo con respecto a la se\xF1al en el ##\n        ## canal esto sea tenido\
+      \ en cuenta.\n        ## Supongo que ya tenemos un valor fijo para L=N nos liberaremos\n\
+      \        ## de los for e if de abajo                                  ##\n \
+      \       ###############################################################\n\n\
+      \        ##################################################################\n\
+      \        ## En realidad lo unico que hay que hacer agregar ruido a la    ##\n\
+      \        ## senal entrante para que salga por output_items[0] y poder    ##\n\
+      \        ## indicar, por output_items[0], el punto de la curva que le    ##\n\
+      \        ## corresponde                                                  ##\n\
+      \        ##################################################################\n\
+      \        output_items[0][:] = input_items[0]+vec_noise_c(L,self.EsN0dB[self.ipoint],\
+      \ Pin,self.Rs,self.B)\n        output_items[1][:] = [self.ipoint]*L # porque\
+      \ ipoint no ha cambiado en la trama L \n#        print(\"ipoint= \",self.ipoint)\n\
+      #        print(\"output1= \", output_items[1])\n\n        ##############################################################\n\
+      \        ## seccion donde se programa el salto a un nivel mayor de   ##\n  \
+      \      ## ruido a inyectar a la se\xF1al                              ##\n \
+      \       ##############################################################\n   \
+      \     # ya sabemos que los if no son deseables, pero tengase en cuenta\n   \
+      \     # que no lo estamos usando para cada muestra, sino para cada\n       \
+      \ # trama de L muestras. Podemos cambiarlo por while una vez pase\n        #\
+      \ todas las pruebas\n        if self.itrial < self.Ntrials[self.ipoint]-1: \n\
+      \            self.itrial += 1\n        else:\n            # reseteamos el contador\
+      \ de ensayos interno. No nos importa\n            # porque nuestro bloque no\
+      \ calcula promedios, solo suma ruido\n            # y senala a que punto de\
+      \ la curva corresponde. Ahora pasamos\n            # al siguiente punto de la\
+      \ curva\n            self.itrial=0\n            if self.ipoint < self.Npoints-1:\n\
+      \                self.ipoint += 1\n            else:\n                self.ipoint=0\n\
+      \        return len(output_items[0])\n\n#############################################################################\n\
+      ## calculo de una muestra de ruido\n## Rb: Rata de simbolos\n## B: Es el ancho\
+      \ de banda pasobanda que va a ocupar el ruido blanco, que no\n##    no es otra\
+      \ cosa que 2 veces el ancho de banda que tiene la envolvente\n##    compleja\
+      \ del ruido blanco que estamos generando. Estamos considerando que\n##    B\
+      \ es igual a la frecuencia de muestreo de la senal\n## N: es el numero de elementos\
+      \ en el vector\n## P_s: es la varianza (potencia promedio) de la senal entrante.\
+      \ \n## SNR_dB: es la relacion senal a ruido en dB del ruido respecto a P_signal\n\
+      #############################################################################\n\
+      \ndef vec_noise_c(N, EsN0_dB,P_s,Rs,B):\n\n    EsN0=pow(10.,EsN0_dB/10.) \n\
+      \    SNR=EsN0*Rs/B\n    P_n = P_s/SNR  # la potencia del ruido\n    Vrms = math.sqrt(P_n)\n\
+      #    print(\"Vrms= \",Vrms)\n    # random.normal() pide la desviacion standard\
+      \ que es el mismo Valor RMS\n    # Vrms es el Valor RMS de la Envolvente compleja\
+      \ del ruido, pero la vamos\n    # a generar como un ruido real mas un ruido\
+      \ imaginario. Pero esas dos\n    # senales tienen un valor RMS un tanto diferente:\
+      \ Vrms_q=Vrms/math.sqrt(2.) \n    Vrms_q= [Vrms/math.sqrt(2.)]*N # Notese que\
+      \ Vrms_q es un vector\n    # print(\"Vrms_q= \",Vrms_q)\n    n=np.random.normal(0.,Vrms_q)+np.random.normal(0.,Vrms_q)*1.j\n\
+      \    return n\n\n\n\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: "('e_EsNo_Channel', 'e_canal_BER', [('N', '8'), ('EsN0min', '0'), ('EsN0max',\
+      \ '16'), ('B', '100'), ('Rs', '1')], [('0', 'complex', 1)], [('0', 'complex',\
+      \ 1), ('1', 'int', 1)], '\\nEs un canal AWGN (Additive White Gaussian Noise,\
+      \ en banda base), Recibe la envolvente compleja de una senal con modulacion\
+      \ digital. \\nEl bloque tiene dos salidas: out0, out1. En out0 entrega la misma\
+      \ senal recibida pero con ruido blanco gausiano aditivo con \\ndiferentes valores\
+      \ de potencia que corresponden a diferentes valores Es/No; en out1 entrega un\
+      \ valor de Es/No aplicado a cada muestra de out0. \\nEste bloque se diferencia\
+      \ de otros bloques tradicionales de canal AWGN en lo siguiente: \\n- Tiene internamente\
+      \ una funcion que mide la potencia promedio de la senal entrante Ps, de modo\
+      \ que puede calcular Es=Ps/Rs; \\n- Al ir variando la potencia del ruido Pn\
+      \ se logra variar la relacion Es/No para que tome N posibles valores entre EsN0min\
+      \ y EsN0max. \\n- Con eso ha completado el primer ensayo para que otro sea el\
+      \ bloque que calcule la Curva de BER. \\n- Pero alli no para, sino que sigue\
+      \ realizando tantos ensayos como lo permita el tiempo de simulacion, para que\
+      \ el bloque que calcula la Curva de BER la pueda ir perfeccionando cada vez\
+      \ mas.\\n\\nDatos de configuracion del bloque:\\nN: Es el numero de puntos discretos\
+      \ que va a tener la curva de BER. Tambien corresponde al numero de valores que\
+      \ tomar\xE1 la relacion Es/No\\nEsN0min: El minimo valor a tener en cuenta para\
+      \ Es/No\\nEsN0max: El maximo valor a tener en cuenta para Es/No\\nRs: es la\
+      \ rata de simbolos.\\nB: Es una caracteristica de la senal entrante, corresponde\
+      \ a la frecuencia de muestreo de la se\xF1al entrante y puede ser mayor o igual\
+      \ a Rs. \\nEs: es la energia de un simbolo\\n\\nSenales de entrada:\\nIn0: Envolvente\
+      \ compleja de se\xF1al con modulacion digital.\\n\\nSenales de salida: \\nout0:\
+      \ es la salida del canal, es decir, la misma se\xF1al entrante pero a la cual\
+      \ se le ha sumado un ruido para satisfacer una determinado valor para la relaci\xF3\
+      n Es/No\\nout1: Es el valor Es/No aplicado a la salida actual.\\n\\nAlgunas\
+      \ variables internas son:\\nNo: es la Densidad espectral del potencia del ruido\
+      \ blanco.\\nSNR-Db: es la relacion senal a ruido en dB\\n\\nNOTA IMPORTANTE:\
+      \ \\n* Nos preguntamos si este bloque no deberia llamarse e_canal_BER, pues\
+      \ no maneja bits, ni relacion alguna con ellos, solo simbolos. El nombre mas\
+      \ apropiado seria e_canal_EsN0\\n* Este bloque no conoce el numero de bits por\
+      \ simbolo, por lo tanto no puede determinar la relacion Eb/No y lo que calcula\
+      \ es la BER con respecto a Es/No.\\n* La Envolvente compleja puede tener varias\
+      \ muestras por simbolo (Sps), por ejemplo cuando ha pasado por un bloque de\
+      \ Wave Forming, por ello SampRate puede ser mayor o igual a Rs. SampRate=Rs*Sps.\
+      \ El problema es que en este caso, la salida out0 tendra tambien Sps valores\
+      \ por simbolo, lo cual debe ser tenido en cuenta por los bloques que usen esta\
+      \ senal.\\n* Es es calculado como: Es = Ps x Ts, donde Ps es la potencia promedio\
+      \ de la senal entrante (se mide internamente) y Ts es la duracion de cada simbolo\
+      \ o Ts = 1 / Rs. Entendemos que eso implica imaginar que los simbolos tienen\
+      \ forma rectangular, lo cual puede ser valido cuando la senal entrante trae\
+      \ modulacion digital basada en puntos de constelacion como es el caso de: BPSK,\
+      \ QPSK, MPSK, MQAM. En otras palabras, es una idealizacion pensada en una herramienta\
+      \ de analisis de Curvas de BER para comparar diferentes tipos de modulacion\
+      \ en condiciones similares.\\n\\nPARA CORREGIR: este bloque no debria llamarse\
+      \ e_canal_BER sino canal_BER_cc\\n', ['B', 'Rs'])"
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [564.0, 224]
+    rotation: 270
+    state: true
+- name: epy_block_2
+  id: epy_block
+  parameters:
+    N: N_snr
+    _source_code: "import numpy as np\nimport random\nimport math\nimport numpy\n\
+      from gnuradio import gr\n\nclass e_BERtool(gr.sync_block):\n\n    \"\"\"\nCalcula\
+      \ la curva de SER (Symbol Error Ratio) o la Curva BER (Bit Error Ratio). Para\
+      \ lograrlo, por las 3 entradas in0, in1, in2 espera hasta que hallan llegado\
+      \ N muestras, con lo cual puede obtener una primera version de la curva de BER\
+      \ (o de SER) de N muestras. Esa curva de BER (o de SER) se va perfeccionando\
+      \ en el tiempo, ya que lo anterior se repite una y otra vez, tanto como lo permita\
+      \ el tiempo que dure corriendo el flujograma, con lo cual va recalculando la\
+      \ curva de BER (o de SER) para que sea cada vez mas perfecta. \n\nSenales de\
+      \ entrada:\nin0: El numero del punto de la BER que esta siendo atendido en el\
+      \ momento, el cual corresponde a un determinado valor de Es/No. Pero en realidad\
+      \ este bloque desconoce Es/No y solo le interesa conocer cual es el numero del\
+      \ punto a atender  \nin1: es la se\xF1al de bits (o de simbolos emitidos), osea,\
+      \ aquellos que est\xE1n antes del canal\nin2: Es la se\xF1al de los bits recibidos\
+      \ (o de simbolos), despu\xE9s de pasar por un canal \n\nSenal de salida\nPuede\
+      \ ser vista como una senal que cada N muestras representa la actualizacion de\
+      \ la curva de BER. La idea es convertirla en un vector de N muestras y graficarla\
+      \ mediante algo asi como un \"QT GUI vector Sink\" \n\nNOTA IMPORTANTE:\n* El\
+      \ bloque e_canal_BER es el que se ha estado usando para generar la senal que\
+      \ entra por in0. Las limitaciones que eso genera son las siguientes:\n   **\
+      \ El canal e_canal_BER esta pensado para llevar envolvente compleja, es decir\
+      \ simbolos. Por lo tanto, lo que realmente se est\xE1 obteniendo en una Curva\
+      \ de SER. Convertir eso a Curva de BER puede que no sea tan facil, necesitaria\
+      \ no contar con que en in1 e in2 esten las senales de bits en vez de simbolos,\
+      \ sino que habria que ajustar la senal destinada a la entrada in0 para que hacer\
+      \ que por cada bit haya un valor de Es/No o de Eb/No\n   ** El bloque e_canal_BER\
+      \ lo que entrega es la relacion Es/No.\n   ** Convertir Es/No a Eb/No es posible\
+      \ pero como parte de un flujograma donde se conozca el numero de bits por simbolo\
+      \ (Bps), teniendo en cuenta que, en t\xE9rminos lineales, Eb=Es/Bps\n   ** La\
+      \ manera en que esta hecho el bloque e_canal_BER hace que si el numero de muestras\
+      \ por simbolo es mayor a 1 (Sps>1), la senal Es/No sale con Sps valores por\
+      \ simbolo. En ese caso se requeriria aplicar algun tipo de mejora ya que nuestro\
+      \ bloque supone que solo hay una muestra Es/No (o Es/No) por cada muestra de\
+      \ senal en in1 e in2.\n* las senales in1 y in2 pueden ser bits o simbolos. En\
+      \ el segundo caso es el que hemos usado mas, ya que las senales in1 e in2 son\
+      \ de tipo M-PAM. Por eso, lo que hemos estado calculando es Curva de SER. Se\
+      \ puede pasar facilmente a Curvas de BER, si a los bits se les aplica de-M-PAM.\n\
+      \nPARA CORREGIR: Este bloque no deberia llamarme e_BERtool, sino BERtool_if\n\
+      \ \n\"\"\"\n\n    ############################################################################################\n\
+      \    ##  Constructor del bloque                                            \
+      \                    ##\n    ############################################################################################\n\
+      \n    def __init__(self, N=16):  \n        gr.sync_block.__init__(\n       \
+      \ self,\n        name='v_BERtool',\n        in_sig=[np.int32, np.int8, np.int8],\n\
+      \        out_sig=[(np.float32,N)])\n\n        # N es el numero de puntos de\
+      \ la curva de SER a calcular\n        # self.errores = np.zeros(self.N)\n  \
+      \      # count: cuenta el numero de muestras que ya han sido procesadas para\
+      \ cada punto de la BER\n        # SER: es la memoria de la ultima curva calculada\n\
+      \n        # self.count=0. # DUDA: PARECE QUE HAY ERROR. DEBERIA HABER UN CONTADOR\
+      \ POR CADA k\n        # self.count=np.zeros(self.N)\n\n        self.N=N \n \
+      \       self.errores = np.float64(np.ones(self.N))\n        self.count=np.uint64(np.ones(self.N))\n\
+      \        #self.SER=np.ones(self.N)\n        self.SER=[1e-12]*N\n        #self.ipointi=0\
+      \ \n\n    ############################################################################################\n\
+      \    ##  Lo de arriba es solo el constructor del bloque). Aqui comienza el verdadero\
+      \ cdigo     ##\n    ############################################################################################\n\
+      \n    def work(self, input_items, output_items):\n        in0=input_items[1]\
+      \ \n        in1=input_items[2] \n        \n        # L: es el tamano del vector\
+      \ de entrada. \n        # i: es el punto actual de los datos entrantes\n   \
+      \     # ipoint: es el punto actual de la SER\n        # count: vector de contadores\
+      \ para cada punto de la curva\t\t\n        L=len(in0)\n\n        # Se recalcula\
+      \ la curva SER. \n        for i in range(0,L):\n            ipoint=input_items[0][i]\
+      \ \n            self.errores[ipoint] += int(in0[i]!=in1[i])\n            self.SER[ipoint]=self.errores[ipoint]/self.count[ipoint]\n\
+      \            self.count[ipoint] = self.count[ipoint]+1\n\n        # La salida\
+      \ es simplemente la curva de SER\n        output_items[0][:]=self.SER\n    \
+      \    return len(output_items[0])\n\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: "('v_BERtool', 'e_BERtool', [('N', '16')], [('0', 'int', 1), ('1',\
+      \ 'byte', 1), ('2', 'byte', 1)], [('0', 'float', 16)], '\\nCalcula la curva\
+      \ de SER (Symbol Error Ratio) o la Curva BER (Bit Error Ratio). Para lograrlo,\
+      \ por las 3 entradas in0, in1, in2 espera hasta que hallan llegado N muestras,\
+      \ con lo cual puede obtener una primera version de la curva de BER (o de SER)\
+      \ de N muestras. Esa curva de BER (o de SER) se va perfeccionando en el tiempo,\
+      \ ya que lo anterior se repite una y otra vez, tanto como lo permita el tiempo\
+      \ que dure corriendo el flujograma, con lo cual va recalculando la curva de\
+      \ BER (o de SER) para que sea cada vez mas perfecta. \\n\\nSenales de entrada:\\\
+      nin0: El numero del punto de la BER que esta siendo atendido en el momento,\
+      \ el cual corresponde a un determinado valor de Es/No. Pero en realidad este\
+      \ bloque desconoce Es/No y solo le interesa conocer cual es el numero del punto\
+      \ a atender  \\nin1: es la se\xF1al de bits (o de simbolos emitidos), osea,\
+      \ aquellos que est\xE1n antes del canal\\nin2: Es la se\xF1al de los bits recibidos\
+      \ (o de simbolos), despu\xE9s de pasar por un canal \\n\\nSenal de salida\\\
+      nPuede ser vista como una senal que cada N muestras representa la actualizacion\
+      \ de la curva de BER. La idea es convertirla en un vector de N muestras y graficarla\
+      \ mediante algo asi como un \"QT GUI vector Sink\" \\n\\nNOTA IMPORTANTE:\\\
+      n* El bloque e_canal_BER es el que se ha estado usando para generar la senal\
+      \ que entra por in0. Las limitaciones que eso genera son las siguientes:\\n\
+      \   ** El canal e_canal_BER esta pensado para llevar envolvente compleja, es\
+      \ decir simbolos. Por lo tanto, lo que realmente se est\xE1 obteniendo en una\
+      \ Curva de SER. Convertir eso a Curva de BER puede que no sea tan facil, necesitaria\
+      \ no contar con que en in1 e in2 esten las senales de bits en vez de simbolos,\
+      \ sino que habria que ajustar la senal destinada a la entrada in0 para que hacer\
+      \ que por cada bit haya un valor de Es/No o de Eb/No\\n   ** El bloque e_canal_BER\
+      \ lo que entrega es la relacion Es/No.\\n   ** Convertir Es/No a Eb/No es posible\
+      \ pero como parte de un flujograma donde se conozca el numero de bits por simbolo\
+      \ (Bps), teniendo en cuenta que, en t\xE9rminos lineales, Eb=Es/Bps\\n   **\
+      \ La manera en que esta hecho el bloque e_canal_BER hace que si el numero de\
+      \ muestras por simbolo es mayor a 1 (Sps>1), la senal Es/No sale con Sps valores\
+      \ por simbolo. En ese caso se requeriria aplicar algun tipo de mejora ya que\
+      \ nuestro bloque supone que solo hay una muestra Es/No (o Es/No) por cada muestra\
+      \ de senal en in1 e in2.\\n* las senales in1 y in2 pueden ser bits o simbolos.\
+      \ En el segundo caso es el que hemos usado mas, ya que las senales in1 e in2\
+      \ son de tipo M-PAM. Por eso, lo que hemos estado calculando es Curva de SER.\
+      \ Se puede pasar facilmente a Curvas de BER, si a los bits se les aplica de-M-PAM.\\\
+      n\\nPARA CORREGIR: Este bloque no deberia llamarme e_BERtool, sino BERtool_if\\\
+      n \\n', ['N'])"
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [488, 1176.0]
+    rotation: 0
+    state: true
+- name: import_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import math
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [992, 4.0]
+    rotation: 0
+    state: true
+- name: import_0_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import random
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1088, 4.0]
+    rotation: 0
+    state: true
+- name: menu
+  id: qtgui_tab_widget
+  parameters:
+    alias: ''
+    comment: ''
+    gui_hint: 4,0,1,1
+    label0: Curvas SER
+    label1: PSD
+    label10: Tab 10
+    label11: Tab 11
+    label12: Tab 12
+    label13: Tab 13
+    label14: Tab 14
+    label15: Tab 15
+    label16: Tab 16
+    label17: Tab 17
+    label18: Tab 18
+    label19: Tab 19
+    label2: Eye Diagram
+    label3: Constellation
+    label4: Timing
+    label5: M-PAM
+    label6: Bits
+    label7: BER SER Curve
+    label8: Tab 8
+    label9: Tab 9
+    num_tabs: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1216, 228.0]
+    rotation: 0
+    state: true
+- name: qtgui_vector_sink_f_0_0
+  id: qtgui_vector_sink_f
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    average: '1.0'
+    color1: '"blue"'
+    color10: '"dark blue"'
+    color2: '"red"'
+    color3: '"green"'
+    color4: '"black"'
+    color5: '"cyan"'
+    color6: '"magenta"'
+    color7: '"yellow"'
+    color8: '"dark red"'
+    color9: '"dark green"'
+    comment: ''
+    grid: 'False'
+    gui_hint: menu@0:1,0,1,1
+    label1: '"SER"'
+    label10: ''
+    label2: '"BER"'
+    label3: 8PSK
+    label4: '"16QAM"'
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"Curvas de SER"'
+    nconnections: '1'
+    ref_level: '0'
+    showports: 'True'
+    update_time: '0.10'
+    vlen: N_snr
+    width1: '4'
+    width10: '1'
+    width2: '4'
+    width3: '4'
+    width4: '4'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    x_axis_label: '"Es/N0 [dB]"'
+    x_start: EsN0min
+    x_step: (EsN0max-EsN0min)/float(N_snr)
+    x_units: '"dB"'
+    y_axis_label: '"logPe"'
+    y_units: '""'
+    ymax: '0'
+    ymin: '-8'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [816, 1156.0]
+    rotation: 0
+    state: enabled
+- name: virtual_sink_0_0_0_0_0
+  id: virtual_sink
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: r40
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [172.0, 240]
+    rotation: 90
+    state: true
+- name: virtual_sink_0_0_0_1
+  id: virtual_sink
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: t40
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [220.0, 240]
+    rotation: 270
+    state: true
+- name: virtual_source_0_0_0_0_0_1
+  id: virtual_source
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: p30
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [40, 1164.0]
+    rotation: 0
+    state: enabled
+- name: virtual_source_0_0_0_0_3
+  id: virtual_source
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: r40
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [40, 1260.0]
+    rotation: 0
+    state: enabled
+- name: virtual_source_0_1_0_3
+  id: virtual_source
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: t40
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [40, 1212.0]
+    rotation: 0
+    state: enabled
+- name: vs0_1_0
+  id: virtual_sink
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: p30
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [700.0, 248]
+    rotation: 90
+    state: enabled
+
+connections:
+- [analog_random_source_x_0, '0', digital_chunks_to_symbols_xx_0, '0']
+- [analog_random_source_x_0, '0', virtual_sink_0_0_0_1, '0']
+- [b_demod_constelacion_cb_0, '0', blocks_null_sink_0, '0']
+- [b_demod_constelacion_cb_0, '0', virtual_sink_0_0_0_0_0, '0']
+- [blocks_nlog10_ff_0_1, '0', qtgui_vector_sink_f_0_0, '0']
+- [digital_chunks_to_symbols_xx_0, '0', epy_block_1, '0']
+- [epy_block_1, '0', b_demod_constelacion_cb_0, '0']
+- [epy_block_1, '1', vs0_1_0, '0']
+- [epy_block_2, '0', blocks_nlog10_ff_0_1, '0']
+- [virtual_source_0_0_0_0_0_1, '0', epy_block_2, '0']
+- [virtual_source_0_0_0_0_3, '0', epy_block_2, '2']
+- [virtual_source_0_1_0_3, '0', epy_block_2, '1']
+
+metadata:
+  file_format: 1
